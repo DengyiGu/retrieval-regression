@@ -1,0 +1,141 @@
+{
+  "experiment": "scifact-lexical-retrieval-and-evaluator-audit",
+  "executed_at_utc": "2026-11-12T10:36:27.622013+00:00",
+  "source_files_sha256": {
+    "benchmarks/scifact.py": "999728fb4270c64792781a168b1f7aacd0dcd9bee805e1a6d2585082f5925045",
+    "src/retrieval_regression/__init__.py": "cbf61ad987226434d738fac7d6ad4775e40491f8a1156572eb6958370d1ededb",
+    "src/retrieval_regression/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "src/retrieval_regression/cli.py": "1bcaed4176b1aa43fa9433343b00873432a511042866b0adda6515e8990f49c7",
+    "src/retrieval_regression/comparison.py": "053b9866b3b86546cdd6068d3a692d0f93d0fcf6529378529e58dafc03073544",
+    "src/retrieval_regression/evaluation.py": "2c6754d48c1a213d68868adbf666a6432fc62e08462c93fdd01bf42bf91d7c24",
+    "src/retrieval_regression/io.py": "b9a73929062a0ae182b13ed28dfa02746ddc1bd7c8cf7401998f9c881c6137ce",
+    "src/retrieval_regression/models.py": "2e90b4658149be5228a3b391bd7f3921d1e6bc14663c4b644bba2f3ca647d602",
+    "src/retrieval_regression/pytest_plugin.py": "569285123949c3950fa9174a2051a9153c2611af7a8a7bfd680d685a31c3cfc8",
+    "src/retrieval_regression/reporting.py": "8098b262fd62525348a0c90d24fc234b209e61624bab77c25463254893168f7e",
+    "src/retrieval_regression/validation.py": "7337328fb3f303821d15cea361714500a5367483d4879e2316ed3a40b1ac18c6"
+  },
+  "git_head": "8924e44a92d1039149a1c0e8ae04352b66e82593",
+  "git_dirty": false,
+  "dataset": {
+    "source_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+    "archive_sha256": "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165",
+    "archive_md5": "5f7d1de60b170fc8027bb7898e2efca1",
+    "split": "test",
+    "documents": 5183,
+    "queries": 300,
+    "judgments": 339,
+    "member_sha256": {
+      "scifact/corpus.jsonl": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6",
+      "scifact/queries.jsonl": "8ff84a7c903f722981cd8d595c022660140c51867b27608a6d4910db86080313",
+      "scifact/qrels/test.tsv": "0864bb985e0ca2367ba217977e72004d549054b2b06666ed9d4825ac7c21284c"
+    }
+  },
+  "configuration": {
+    "depth": 100,
+    "k": [
+      1,
+      5,
+      10
+    ],
+    "seed": 42,
+    "bm25": {
+      "implementation": "rank_bm25.BM25Okapi",
+      "k1": 1.5,
+      "b": 0.75,
+      "epsilon": 0.25
+    },
+    "tfidf": {
+      "sublinear_tf": true,
+      "norm": "l2",
+      "stop_words": "english"
+    },
+    "shared_analyzer": "sklearn word tokens of length >=2, lowercase, English stopwords",
+    "group_rule": "short_query <=12 analyzed tokens, otherwise long_query",
+    "bootstrap_samples": 1000,
+    "max_absolute_ndcg10_drop": 0.02
+  },
+  "metrics": {
+    "bm25": {
+      "recall@1": 0.5319444444444444,
+      "precision@1": 0.55,
+      "mrr@1": 0.55,
+      "ndcg@1": 0.55,
+      "recall@5": 0.7192777777777778,
+      "precision@5": 0.15600000000000003,
+      "mrr@5": 0.6272777777777778,
+      "ndcg@5": 0.643794860626064,
+      "recall@10": 0.7914444444444445,
+      "precision@10": 0.08833333333333333,
+      "mrr@10": 0.6367936507936508,
+      "ndcg@10": 0.669692703005812
+    },
+    "tfidf": {
+      "recall@1": 0.46111111111111114,
+      "precision@1": 0.48333333333333334,
+      "mrr@1": 0.48333333333333334,
+      "ndcg@1": 0.48333333333333334,
+      "recall@5": 0.7275555555555556,
+      "precision@5": 0.15866666666666668,
+      "mrr@5": 0.5828888888888889,
+      "ndcg@5": 0.6112133326134953,
+      "recall@10": 0.7743333333333333,
+      "precision@10": 0.08600000000000001,
+      "mrr@10": 0.5885396825396826,
+      "ndcg@10": 0.6279652522956557
+    },
+    "delta": {
+      "recall@1": -0.0708333333333333,
+      "precision@1": -0.06666666666666671,
+      "mrr@1": -0.06666666666666671,
+      "ndcg@1": -0.06666666666666671,
+      "recall@5": 0.008277777777777828,
+      "precision@5": 0.0026666666666666505,
+      "mrr@5": -0.04438888888888892,
+      "ndcg@5": -0.03258152801256864,
+      "recall@10": -0.017111111111111188,
+      "precision@10": -0.002333333333333326,
+      "mrr@10": -0.048253968253968216,
+      "ndcg@10": -0.041727450710156266
+    }
+  },
+  "gates_passed": false,
+  "independent_reference_max_abs_error": {
+    "bm25": 6.661338147750939e-16,
+    "tfidf": 6.661338147750939e-16
+  },
+  "injected_fault": {
+    "kind": "deliberately omit every tenth query in sorted ID order",
+    "omitted_queries": 30,
+    "gate_detected": true,
+    "full_query_count": 300,
+    "faulty_ndcg10": 0.6067589493710628,
+    "incorrect_survivor_only_ndcg10": 0.6741766104122919
+  },
+  "timing_seconds": {
+    "tfidf_build_and_retrieve": 1.7045373000000836,
+    "bm25_build_and_retrieve": 4.990317599993432,
+    "whole_script": 8.111539799996535
+  },
+  "environment": {
+    "python": "3.11.3",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "packages": {
+      "retrieval-regression": "0.1.0",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "scikit-learn": "1.9.1",
+      "rank-bm25": "0.2.2",
+      "ir-measures": "0.4.3",
+      "pytrec-eval-terrier": "0.5.11",
+      "truststore": "0.10.5"
+    }
+  },
+  "limitations": [
+    "One English scientific retrieval dataset; no neural retriever or training.",
+    "Fixed untuned lexical baselines; not official BEIR leaderboard configurations.",
+    "Incomplete judgments; unjudged documents are assigned zero relevance.",
+    "Injected faults demonstrate detection, not natural model improvement.",
+    "Wall times are local observations, not controlled performance comparisons.",
+    "Original and mirror license metadata differ; raw data is not redistributed."
+  ]
+}

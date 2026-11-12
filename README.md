@@ -171,7 +171,8 @@ No benchmark speedups, model improvements, or external adoption are claimed.
 
 A public SciFact experiment is included in `benchmarks/scifact.py`; install `.[benchmark]`
 and run `python benchmarks/scifact.py --download` once, then rerun offline without that flag.
-See [the validation report](docs/reports/2026-11-12-validation.md) for measured outcomes.
+See [the validation report](docs/reports/2026-11-12-validation.md) for measured outcomes and
+[the follow-up review](docs/reports/2026-11-12-review.md) for audit fixes and remaining limits.
 Ranking-file adapters and large-run scalability work remain on the roadmap. See [research protocol](docs/RESEARCH.md).
 
 ## Maintainer
