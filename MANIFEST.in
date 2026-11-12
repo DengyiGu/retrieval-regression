@@ -1,3 +1,5 @@
+global-exclude *.md
+prune .*
 include LICENSE README.md CONTRIBUTING.md CHANGELOG.md
 include docs/API.md docs/ARCHITECTURE.md docs/DEVELOPMENT.md docs/EVALUATION.md
 include docs/REQUIREMENTS.md docs/RESEARCH.md docs/ROADMAP.md

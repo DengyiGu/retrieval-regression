@@ -41,6 +41,7 @@ own `erase` command when starting a fresh local coverage measurement.
 
 ```console
 python -m build
+python scripts/check_sdist.py dist/retrieval_regression-0.1.0.tar.gz
 python -m twine check dist/*
 python scripts/smoke_wheel.py dist/retrieval_regression-0.1.0-py3-none-any.whl --with-pytest
 ```
