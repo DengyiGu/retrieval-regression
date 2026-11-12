@@ -1,0 +1,6 @@
+{
+  "q-install": "setup",
+  "q-api": "api",
+  "q-version": "versions",
+  "q-empty": "troubleshooting"
+}

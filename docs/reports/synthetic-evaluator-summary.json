@@ -1,0 +1,21 @@
+{
+  "kind": "synthetic_evaluator_benchmark",
+  "queries": 1000,
+  "documents_per_run_query": 100,
+  "seed": 42,
+  "repeats": 3,
+  "seconds": [
+    0.07373309999820776,
+    0.07249960000626743,
+    0.07398749999993015
+  ],
+  "median_seconds": 0.07373309999820776,
+  "separate_tracemalloc_peak_bytes": 4411204,
+  "python": "3.11.3",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "k": [
+    5,
+    10
+  ],
+  "input_sha256": "477336b3743a4de860438be3f2e9960d51568f9fddc5a8b91d21017a1e0dff09"
+}

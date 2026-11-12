@@ -1,0 +1,13 @@
+{
+  "thresholds": [
+    {
+      "metric": "recall@3",
+      "min_value": 0.7,
+      "max_drop": 0.02
+    },
+    {
+      "metric": "ndcg@3",
+      "max_drop": 0.02
+    }
+  ]
+}

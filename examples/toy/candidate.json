@@ -1,0 +1,16 @@
+{
+  "q-install": {
+    "install": 3,
+    "setup": 2
+  },
+  "q-api": {
+    "api": 3,
+    "wrong": 2
+  },
+  "q-version": {
+    "version": 3
+  },
+  "q-empty": {
+    "troubleshooting": 3
+  }
+}

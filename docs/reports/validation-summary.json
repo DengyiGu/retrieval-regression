@@ -1,0 +1,18 @@
+{
+  "test_passed": 68,
+  "example_test_passed": 1,
+  "coverage_percent_statements_and_branches": 97.00854700854701,
+  "lint": "passed",
+  "format": "passed",
+  "strict_source_typing": "passed",
+  "independent_seeded_metric_test": "passed",
+  "public_dataset": {
+    "name": "BEIR SciFact",
+    "split": "test",
+    "queries": 300,
+    "documents": 5183,
+    "judgments": 339
+  },
+  "experiment_source_fingerprints": "verified",
+  "remote_ci": "configured, not yet observed"
+}

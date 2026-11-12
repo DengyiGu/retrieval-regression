@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "retrieval-regression"
+version = "0.1.0"
+description = "Local regression testing for search and RAG retrieval pipelines"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "Dengyi Gu"}]
+keywords = ["retrieval", "rag", "evaluation", "regression-testing", "pytest"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Testing",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = []
+
+[project.optional-dependencies]
+pytest = ["pytest>=8,<10"]
+dev = ["pytest>=8,<10", "coverage[toml]>=7.10,<8", "ruff>=0.9,<1", "mypy>=1.14,<2", "build>=1.2,<2", "twine>=6,<7"]
+reference = ["ir-measures>=0.3.6,<1"]
+benchmark = ["rank-bm25>=0.2.2,<1", "scikit-learn>=1.5,<2", "truststore>=0.10,<1", "ir-measures>=0.3.6,<1"]
+
+[project.urls]
+Homepage = "https://github.com/DengyiGu/retrieval-regression"
+Issues = "https://github.com/DengyiGu/retrieval-regression/issues"
+
+[project.scripts]
+retrieval-regression = "retrieval_regression.cli:main"
+rr = "retrieval_regression.cli:main"
+
+[project.entry-points.pytest11]
+retrieval_regression = "retrieval_regression.pytest_plugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+retrieval_regression = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = ["reference: optional cross-check against ir-measures"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/retrieval_regression"]
+
+[tool.coverage.run]
+source = ["retrieval_regression"]
+branch = true
+parallel = true
+patch = ["subprocess"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
