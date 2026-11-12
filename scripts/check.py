@@ -20,6 +20,7 @@ COMMANDS = [
 
 
 def main() -> int:
+    (ROOT / "work").mkdir(exist_ok=True)
     for command in COMMANDS:
         print("Running: python -m " + " ".join(command), flush=True)
         result = subprocess.run([sys.executable, "-m", *command], cwd=ROOT, check=False)
