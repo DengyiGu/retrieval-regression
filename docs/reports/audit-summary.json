@@ -51,6 +51,48 @@
     }
   },
   "remote_ci": {
-    "status": "pending publication"
-  }
+    "status": "passed",
+    "source_commit": "8f18182dc7fc0470a9a307e1acea2ee4fd5070c6",
+    "run_url": "https://github.com/DengyiGu/retrieval-regression/actions/runs/43203547573",
+    "jobs_passed": 9,
+    "jobs": [
+      {
+        "name": "reference-and-package",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.11)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.12)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.11)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.12)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.13)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.10)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.10)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.13)",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "fresh_checkout_check_runner": "passed with existing development interpreter; fresh installation also verified in CI"
 }

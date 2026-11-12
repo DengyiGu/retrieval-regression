@@ -154,9 +154,10 @@ implementation independently of the eventual bootstrap commit.
 One English scientific dataset and two lexical baselines are insufficient to establish broad
 retrieval quality. Relevance judgments are incomplete. No embedding/reranker inference, training,
 answer evaluation, streaming million-query run, or cross-platform execution was tested locally.
-The [actual GitHub CI run](https://github.com/DengyiGu/retrieval-regression/actions/runs/43195875088) for implementation commit
-`5518e88` passed all nine jobs: Windows/Linux on Python 3.10-3.13, plus independent-reference
-and package validation. These are observed results, not merely a workflow configuration.
+The [follow-up GitHub CI run](https://github.com/DengyiGu/retrieval-regression/actions/runs/43203547573) for commit
+`8f18182` passed all nine jobs: Windows/Linux on Python 3.10-3.13, plus
+independent-reference, source-archive and clean-wheel installation checks. See the
+[follow-up review](2026-11-12-review.md) for the additional audit fixes.
 PyPI publication has not occurred.
 
 Next: add strict BEIR/TREC adapters, validate another domain and a pinned neural retriever where

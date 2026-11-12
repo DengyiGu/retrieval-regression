@@ -1,7 +1,7 @@
 {
-  "test_passed": 68,
+  "test_passed": 74,
   "example_test_passed": 1,
-  "coverage_percent_statements_and_branches": 97.00854700854701,
+  "coverage_percent_statements_and_branches": 97.07112970711297,
   "lint": "passed",
   "format": "passed",
   "strict_source_typing": "passed",
@@ -15,8 +15,8 @@
   },
   "experiment_source_fingerprints": "verified",
   "remote_ci": "passed: all 9 jobs",
-  "remote_ci_run_url": "https://github.com/DengyiGu/retrieval-regression/actions/runs/43195875088",
-  "remote_ci_source_commit": "5518e88e8c4edb6da4400b0114a0b55a0cb93deb",
+  "remote_ci_run_url": "https://github.com/DengyiGu/retrieval-regression/actions/runs/43203547573",
+  "remote_ci_source_commit": "8f18182dc7fc0470a9a307e1acea2ee4fd5070c6",
   "remote_ci_matrix": {
     "operating_systems": [
       "Windows",
@@ -29,5 +29,6 @@
       "3.13"
     ],
     "additional_job": "independent reference and packaging"
-  }
+  },
+  "follow_up_evidence": "audit-summary.json"
 }
