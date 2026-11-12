@@ -15,6 +15,10 @@ from .io import load_json, load_thresholds
 from .reporting import write_html, write_json
 
 
+def _same_file(left: Path, right: Path) -> bool:
+    return left == right or (left.exists() and right.exists() and left.samefile(right))
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="retrieval-regression")
     parser.add_argument("--version", action="version", version=__version__)
@@ -47,16 +51,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             for name in ("json_output", "html_output")
             if getattr(args, name, None)
         ]
-        if len(set(output_paths)) != len(output_paths):
+        if any(
+            _same_file(left, right)
+            for index, left in enumerate(output_paths)
+            for right in output_paths[index + 1 :]
+        ):
             raise ValueError("JSON and HTML output paths must be different")
-        if input_paths.intersection(output_paths):
+        if any(_same_file(source, target) for source in input_paths for target in output_paths):
             raise ValueError("output paths must not overwrite input files")
         qrels = load_json(args.qrels)
         if args.command == "evaluate":
             evaluation = evaluate(qrels, load_json(args.run), k=args.k)
             if args.json_output:
                 write_json(evaluation, args.json_output)
-            print(json.dumps(evaluation.to_dict(), indent=2, ensure_ascii=False, allow_nan=False))
+            print(json.dumps(evaluation.to_dict(), indent=2, ensure_ascii=True, allow_nan=False))
             return 0
         comparison = compare(
             qrels,
@@ -73,7 +81,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             write_json(comparison, args.json_output)
         if args.html_output:
             write_html(comparison, args.html_output)
-        print(json.dumps(comparison.to_dict(), indent=2, ensure_ascii=False, allow_nan=False))
+        print(json.dumps(comparison.to_dict(), indent=2, ensure_ascii=True, allow_nan=False))
         return 0 if comparison.passed else 1
     except (ValueError, OSError, TypeError) as exc:
         print(f"error: {exc}", file=sys.stderr)

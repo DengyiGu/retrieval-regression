@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 
@@ -147,3 +148,79 @@ def test_cli_requires_distinct_report_paths(examples, tmp_path):
     )
     assert result.returncode == 2
     assert "must be different" in result.stderr
+
+
+@pytest.mark.parametrize("number", ["1e309", "-1e999"])
+def test_overflowing_json_numbers_are_rejected(tmp_path, number):
+    path = tmp_path / "overflow.json"
+    path.write_text('{"q":{"d":' + number + "}}", encoding="utf-8")
+    with pytest.raises(ValueError, match="non-finite"):
+        load_json(path)
+
+
+def test_cli_cannot_overwrite_input_through_hard_link(examples, tmp_path):
+    source = tmp_path / "qrels.json"
+    original = (examples / "qrels.json").read_bytes()
+    source.write_bytes(original)
+    alias = tmp_path / "report.json"
+    os.link(source, alias)
+    result = run_cli(
+        "evaluate", "--qrels", source, "--run", examples / "baseline.json", "--json", alias
+    )
+    assert result.returncode == 2
+    assert "overwrite input" in result.stderr
+    assert source.read_bytes() == original
+
+
+def test_cli_rejects_hard_linked_report_destinations(examples, tmp_path):
+    first, second = tmp_path / "report.json", tmp_path / "report.html"
+    first.write_text("existing report", encoding="utf-8")
+    os.link(first, second)
+    result = run_cli(
+        "compare",
+        "--qrels",
+        examples / "qrels.json",
+        "--baseline",
+        examples / "baseline.json",
+        "--candidate",
+        examples / "candidate.json",
+        "--json",
+        first,
+        "--html",
+        second,
+    )
+    assert result.returncode == 2
+    assert "must be different" in result.stderr
+    assert first.read_text(encoding="utf-8") == "existing report"
+
+
+def test_html_does_not_claim_quality_passed_without_gates(tmp_path):
+    result = compare({"q": {"d": 1}}, {"q": {"d": 1}}, {}, k=[1])
+    report = tmp_path / "report.html"
+    write_html(result, report)
+    text = report.read_text(encoding="utf-8")
+    assert "Gate status: <strong>NOT CONFIGURED</strong>" in text
+    assert "Gate status: <strong>PASS</strong>" not in text
+
+
+def test_cli_unicode_ids_work_with_ascii_stdout(tmp_path):
+    qrels = tmp_path / "qrels.json"
+    qrels.write_text(json.dumps({"\u4e2d\u6587\U0001f50e": {"doc": 1}}), encoding="utf-8")
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "retrieval_regression",
+            "evaluate",
+            "--qrels",
+            str(qrels),
+            "--run",
+            str(qrels),
+        ],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env={**os.environ, "PYTHONIOENCODING": "ascii"},
+    )
+    assert result.returncode == 0, result.stderr
+    assert "\u4e2d\u6587\U0001f50e" in json.loads(result.stdout)["per_query"]

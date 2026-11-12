@@ -71,7 +71,7 @@ def write_html(result: ComparisonResult, path: str | Path) -> None:
         )
         or "<li>Bootstrap intervals not requested.</li>"
     )
-    status = "PASS" if result.passed else "FAIL"
+    status = ("PASS" if result.passed else "FAIL") if result.gates else "NOT CONFIGURED"
     content = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>Retrieval Regression Report</title><style>

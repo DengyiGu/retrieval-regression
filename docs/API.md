@@ -93,3 +93,9 @@ Comparison flags: `--qrels`, `--baseline`, `--candidate`, `--k`, `--config`, `--
 Evaluation flags: `--qrels`, `--run`, `--k`, `--json`.
 The CLI always prints result JSON on a valid invocation. Exit 1 is an expected result for a
 failed gate, not a program crash. Invalid data/configuration yields exit 2 and an error message.
+
+The HTML gate status is `NOT CONFIGURED` when no thresholds were supplied. The existing Python
+`passed=True` value in that case means no gate failed; inspect `gates` before treating it as a
+quality verdict. CLI stdout uses ASCII JSON escapes so Unicode IDs survive legacy terminal
+encodings; report files retain UTF-8 text. CLI output paths must differ from input files and
+from each other, including symbolic-link and hard-link aliases present at validation time.

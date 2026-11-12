@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -22,10 +23,22 @@ def _reject_constant(value: str) -> Any:
     raise ValueError(f"non-finite JSON number {value!r}")
 
 
+def _finite_float(value: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError(f"non-finite JSON number {value!r}")
+    return number
+
+
 def load_json(path: str | Path) -> Any:
     """Read UTF-8 (including BOM), disallowing duplicate keys and NaN/Infinity."""
     with Path(path).open(encoding="utf-8-sig") as handle:
-        return json.load(handle, object_pairs_hook=_unique_object, parse_constant=_reject_constant)
+        return json.load(
+            handle,
+            object_pairs_hook=_unique_object,
+            parse_constant=_reject_constant,
+            parse_float=_finite_float,
+        )
 
 
 def load_thresholds(path: str | Path) -> tuple[Threshold, ...]:

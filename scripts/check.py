@@ -12,7 +12,7 @@ COMMANDS = [
     ["ruff", "format", "--check", "."],
     ["mypy", "src/retrieval_regression"],
     ["coverage", "erase"],
-    ["coverage", "run", "-m", "pytest", "-q"],
+    ["coverage", "run", "-m", "pytest", "-q", "--basetemp=work/pytest-tests"],
     ["coverage", "combine"],
     ["coverage", "report"],
     ["pytest", "examples/test_retrieval_quality.py", "-q"],

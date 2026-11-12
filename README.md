@@ -18,6 +18,22 @@ Retrieval Regression evaluates both runs over the **same complete set of judged 
 shows what changed, and lets you fail a test when a configured quality budget is exceeded.
 It evaluates retrieved document rankings, not generated-answer correctness.
 
+## When to use it
+
+Use this library when you already have relevance judgments and exported baseline/candidate
+rankings, and want a repeatable pass/fail check in CI. For example, accept an index change only
+if overall NDCG@10 drops by no more than 0.02 and an important query category keeps Recall@10
+above its minimum. Keep corpus IDs and judgment semantics stable across the two runs.
+
+Established tools such as [ir-measures](https://ir-measur.es/en/latest/) already provide a much
+broader metric catalog, and [BEIR](https://github.com/beir-cellar/beir) provides datasets and
+retrieval benchmarks. This project's focus is a small regression-testing workflow: strict inputs,
+paired differences, category gates, pytest failures, and an offline report. The metric formulas
+are standard. If you only need metric calculation, an existing evaluator may be sufficient.
+
+Changing chunk boundaries or document IDs requires corresponding judgment mapping; this library
+does not create that mapping. It also needs external judgments and cannot assess generated answers.
+
 ## Install from source
 
 Python 3.10+ is required. These commands work in Windows PowerShell and POSIX shells:
@@ -142,7 +158,7 @@ Full definitions, limitations, and statistical assumptions: [evaluation protocol
 src/retrieval_regression/    Metrics, validation, comparisons, reports, CLI, pytest plugin
 tests/                      Correctness, integration, and independent-reference checks
 examples/                   Offline toy data and runnable usage
-benchmarks/                 Reproducible synthetic evaluator benchmark
+benchmarks/                 SciFact validation and synthetic evaluator benchmark
 docs/                       Requirements, architecture, research protocol and roadmap
 ```
 
@@ -157,6 +173,10 @@ A public SciFact experiment is included in `benchmarks/scifact.py`; install `.[b
 and run `python benchmarks/scifact.py --download` once, then rerun offline without that flag.
 See [the validation report](docs/reports/2026-11-12-validation.md) for measured outcomes.
 Ranking-file adapters and large-run scalability work remain on the roadmap. See [research protocol](docs/RESEARCH.md).
+
+## Maintainer
+
+[Dengyi Gu](https://github.com/DengyiGu).
 
 ## License
 
