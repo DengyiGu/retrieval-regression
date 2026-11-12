@@ -14,5 +14,20 @@
     "judgments": 339
   },
   "experiment_source_fingerprints": "verified",
-  "remote_ci": "configured, not yet observed"
+  "remote_ci": "passed: all 9 jobs",
+  "remote_ci_run_url": "https://github.com/DengyiGu/retrieval-regression/actions/runs/43195875088",
+  "remote_ci_source_commit": "5518e88e8c4edb6da4400b0114a0b55a0cb93deb",
+  "remote_ci_matrix": {
+    "operating_systems": [
+      "Windows",
+      "Linux"
+    ],
+    "python": [
+      "3.10",
+      "3.11",
+      "3.12",
+      "3.13"
+    ],
+    "additional_job": "independent reference and packaging"
+  }
 }
