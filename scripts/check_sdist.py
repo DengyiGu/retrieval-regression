@@ -29,6 +29,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("archive", type=Path)
     args = parser.parse_args()
+    if args.archive.is_dir():
+        (args.archive,) = args.archive.glob("*.tar.gz")
     tracked = set(
         subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode("utf-8").split("\0")
     )

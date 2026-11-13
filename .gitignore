@@ -16,3 +16,10 @@ coverage.xml
 .env
 .env.*
 !.env.example
+
+# Local tool scratch directories
+/pip-*/
+/pytest-of-*/
+/torchinductor_*/
+/build-env-*/
+/build-requirements-*.txt

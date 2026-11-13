@@ -79,9 +79,16 @@ model or code repository is not needed for this checkpoint. Release assets keep 
 To reproduce the one-additional-seed check after the original experiment:
 
 ```console
-python -m scripts.check_model_release --seed 13
+python -m experiments.reranking.check_seed --seed 13
 ```
 
 It reuses the original fixed split, trains only the validation-selected random-negative
 condition and reports that checkpoint on the two existing test sets. It selects between seeds
 42 and 13 using validation only. This is a short confirmation, not a comprehensive seed sweep.
+
+## Additional seed on the fixed split
+
+After the main experiment, `python -m experiments.reranking.check_seed --seed 13` reuses its
+cached training/validation split and candidates, trains a random-negative variant and selects
+by validation NDCG@10 before reporting held-out results. Use `--source` and `--output` for
+separate artifact directories. This optional GPU experiment is not part of CI.

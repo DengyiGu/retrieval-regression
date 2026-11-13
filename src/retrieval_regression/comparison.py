@@ -30,11 +30,18 @@ def compare(
     bootstrap_samples: int = 0,
     confidence: float = 0.95,
     seed: int = 0,
+    gate_mode: str = "point",
+    min_queries: int = 20,
+    multiple_testing: str = "bonferroni",
+    negative_grades: str = "error",
+    no_positive: str = "error",
+    tie_breaker: str = "doc_id_asc",
 ) -> ComparisonResult:
     """Compare runs on identical queries; max_drop is an absolute metric drop.
 
-    Optional bootstrap CIs resample query-level paired differences. They are descriptive,
-    are not p-values, and do not change quality-gate decisions.
+    Point mode applies budgets to observed means. Bootstrap mode applies budgets
+    to percentile intervals and returns inconclusive when evidence is insufficient.
+    Queries must be independent sampling units; coverage is approximate.
     """
     if (
         isinstance(bootstrap_samples, bool)
@@ -47,8 +54,30 @@ def compare(
     confidence = _number(confidence, "confidence")
     if not 0 < confidence < 1:
         raise ValueError("confidence must be between 0 and 1")
-    base = evaluate(qrels, baseline, k=k)
-    cand = evaluate(qrels, candidate, k=k)
+    if gate_mode not in {"point", "bootstrap"}:
+        raise ValueError("gate_mode must be point or bootstrap")
+    if multiple_testing not in {"none", "bonferroni"}:
+        raise ValueError("multiple_testing must be none or bonferroni")
+    if isinstance(min_queries, bool) or not isinstance(min_queries, int) or min_queries < 2:
+        raise ValueError("min_queries must be an integer >= 2")
+    if gate_mode == "bootstrap" and bootstrap_samples < 1000:
+        raise ValueError("bootstrap gates require bootstrap_samples >= 1000")
+    base = evaluate(
+        qrels,
+        baseline,
+        k=k,
+        negative_grades=negative_grades,
+        no_positive=no_positive,
+        tie_breaker=tie_breaker,
+    )
+    cand = evaluate(
+        qrels,
+        candidate,
+        k=k,
+        negative_grades=negative_grades,
+        no_positive=no_positive,
+        tie_breaker=tie_breaker,
+    )
     metrics = tuple(base.summary)
     qids = tuple(base.per_query)
     delta = {metric: cand.summary[metric] - base.summary[metric] for metric in metrics}
@@ -59,14 +88,14 @@ def compare(
         for qid in qids
     }
     grouped: dict[str, dict[str, Any]] = {}
+    buckets: dict[str, list[str]] = {}
     if groups is not None:
         if not isinstance(groups, Mapping):
             raise ValueError("groups must map query IDs to category names")
         for qid, group in groups.items():
-            if qid not in base.per_query:
+            if qid not in qrels:
                 raise ValueError(f"groups contains unknown query ID {qid!r}")
             _identifier(group, f"groups[{qid!r}]")
-        buckets: dict[str, list[str]] = {}
         for qid in qids:
             buckets.setdefault(groups.get(qid, "__ungrouped__"), []).append(qid)
         for group, members in sorted(buckets.items()):
@@ -82,6 +111,31 @@ def compare(
                 "candidate": c,
                 "delta": {m: c[m] - b[m] for m in metrics},
             }
+    cache: dict[tuple[float, ...], list[float]] = {}
+
+    def interval(values: tuple[float, ...], level: float) -> ConfidenceInterval:
+        if values not in cache:
+            rng = random.Random(seed)
+            cache[values] = sorted(
+                math.fsum(rng.choices(values, k=len(values))) / len(values)
+                for _ in range(bootstrap_samples)
+            )
+        alpha = (1 - level) / 2
+        return ConfidenceInterval(
+            _percentile(cache[values], alpha),
+            _percentile(cache[values], 1 - alpha),
+            level,
+            bootstrap_samples,
+        )
+
+    bounds = sum(
+        (t.min_value is not None) + (t.max_drop is not None)
+        for t in thresholds
+        if isinstance(t, Threshold)
+    )
+    gate_confidence = (
+        1 - (1 - confidence) / max(1, bounds) if (multiple_testing == "bonferroni") else confidence
+    )
     gates: list[GateResult] = []
     for threshold in thresholds:
         if not isinstance(threshold, Threshold):
@@ -113,25 +167,67 @@ def compare(
         passed = (minimum is None or after + 1e-12 >= minimum) and (
             drop is None or after + 1e-12 >= before - drop
         )
+        gate_members = qids if threshold.group is None else tuple(buckets[threshold.group])
+        evidence: dict[str, ConfidenceInterval] = {}
+        status = "pass" if passed else "fail"
+        reason = "Observed means compared with absolute budgets"
+        if gate_mode == "bootstrap":
+            targets: dict[str, float] = {}
+            if minimum is not None:
+                evidence["min_value"] = interval(
+                    tuple(cand.per_query[q][threshold.metric] for q in gate_members),
+                    gate_confidence,
+                )
+                targets["min_value"] = minimum
+            if drop is not None:
+                evidence["max_drop"] = interval(
+                    tuple(per_query_delta[q][threshold.metric] for q in gate_members),
+                    gate_confidence,
+                )
+                targets["max_drop"] = -drop
+            if len(gate_members) < min_queries:
+                status = "inconclusive"
+                reason = f"Only {len(gate_members)} queries; min_queries={min_queries}"
+            elif any(ci.high + 1e-12 < targets[name] for name, ci in evidence.items()):
+                status = "fail"
+                reason = "An interval is entirely below its budget boundary"
+            elif all(ci.low + 1e-12 >= targets[name] for name, ci in evidence.items()):
+                status = "pass"
+                reason = "All interval lower bounds meet their budget boundaries"
+            else:
+                status = "inconclusive"
+                reason = "An interval overlaps its budget boundary"
         gates.append(
-            GateResult(threshold.metric, threshold.group, before, after, minimum, drop, passed)
+            GateResult(
+                threshold.metric,
+                threshold.group,
+                before,
+                after,
+                minimum,
+                drop,
+                status == "pass",
+                status,
+                len(gate_members),
+                evidence,
+                reason,
+            )
         )
     intervals: dict[str, ConfidenceInterval] = {}
     if bootstrap_samples:
-        for metric in metrics:
-            rng = random.Random(seed)
-            differences = [per_query_delta[qid][metric] for qid in qids]
-            means = sorted(
-                math.fsum(rng.choices(differences, k=len(qids))) / len(qids)
-                for _ in range(bootstrap_samples)
-            )
-            alpha = (1 - confidence) / 2
-            intervals[metric] = ConfidenceInterval(
-                _percentile(means, alpha),
-                _percentile(means, 1 - alpha),
-                confidence,
-                bootstrap_samples,
-            )
+        intervals = {
+            m: interval(tuple(per_query_delta[q][m] for q in qids), confidence) for m in metrics
+        }
+        for group, members in buckets.items():
+            grouped[group]["confidence_intervals"] = {
+                m: {
+                    "low": ci.low,
+                    "high": ci.high,
+                    "confidence": ci.confidence,
+                    "samples": ci.samples,
+                }
+                for m in metrics
+                for ci in [interval(tuple(per_query_delta[q][m] for q in members), confidence)]
+            }
     return ComparisonResult(
         base,
         cand,
@@ -142,4 +238,6 @@ def compare(
         all(gate.passed for gate in gates),
         intervals,
         seed,
+        gate_mode,
+        multiple_testing,
     )

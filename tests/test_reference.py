@@ -78,3 +78,18 @@ def test_standard_file_adapters_match_independent_file_readers(tmp_path):
             assert actual.per_query[score.query_id][names[score.measure]] == pytest.approx(
                 score.value, abs=1e-12
             )
+
+
+@pytest.mark.reference
+def test_descending_id_ties_match_trec_eval_provider():
+    qrels = {"q": {"a": 0, "z": 1}}
+    run = {"q": {"a": 1, "z": 1}}
+    # Pin the provider: ir-measures may dispatch other metrics to different engines.
+    oracle = ir.providers.registry["pytrec_eval"].calc_aggregate(
+        [ir.nDCG @ 1, ir.R @ 1],
+        [ir.Qrel("q", "a", 0), ir.Qrel("q", "z", 1)],
+        [ir.ScoredDoc("q", "a", 1), ir.ScoredDoc("q", "z", 1)],
+    )
+    actual = evaluate(qrels, run, k=[1], tie_breaker="doc_id_desc")
+    assert actual.summary["ndcg@1"] == oracle[ir.nDCG @ 1] == 1
+    assert actual.summary["recall@1"] == oracle[ir.R @ 1] == 1

@@ -7,7 +7,7 @@
 ```
 
 Qrels map query IDs to document relevance grades. IDs must be non-empty strings. Grades must
-be finite, real, non-negative numbers (booleans rejected). Every query needs a positive grade.
+be finite, real, non-negative numbers (booleans rejected). Every query needs a positive grade by default; explicit policies below can change this.
 The project recommends small integer grades for interoperability with reference tools.
 
 Runs use the same nested shape, with finite retrieval scores instead of grades:
@@ -32,7 +32,7 @@ result = evaluate(qrels, run, k=[1, 5, 10])
 
 Returns `EvaluationResult` with `summary`, `per_query`, `diagnostics`, normalized `k`, and
 `query_count`. Metric keys are lower-case `recall@K`, `precision@K`, `mrr@K`, `ndcg@K`.
-`result.to_dict()` adds `schema_version="1.0"` and `kind="evaluation"`.
+`result.to_dict()` adds `schema_version="1.1"` and `kind="evaluation"`.
 
 ## Comparison
 
@@ -53,7 +53,7 @@ result = compare(
 ```
 
 `ComparisonResult`: `baseline`, `candidate`, `delta`, `per_query_delta`, `groups`, `gates`,
-`passed`, `confidence_intervals`, `seed`. `to_dict()` uses `kind="comparison"` and schema 1.0.
+`passed`, `confidence_intervals`, `seed`. `to_dict()` uses `kind="comparison"` and schema 1.1.
 Input dictionaries are not mutated. Returned nested dictionaries are regular Python objects;
 do not modify results before writing reports if you want to preserve the original evidence.
 
@@ -91,7 +91,10 @@ Run `python -m retrieval_regression --help`, then `compare --help` or `evaluate 
 Comparison flags: `--qrels`, `--baseline`, `--candidate`, `--k`, `--config`, `--groups`,
 `--json`, `--html`, `--bootstrap-samples`, `--confidence`, `--seed`.
 Evaluation flags: `--qrels`, `--run`, `--k`, `--json`.
-The CLI always prints result JSON on a valid invocation. Exit 1 is an expected result for a
+The CLI prints full result JSON by default. `--summary` / `--stdout summary` omit per-query
+arrays and report metric values, counts and gate status counts. `--stdout none` suppresses stdout;
+`--json` still writes full evidence. Inconclusive statistical gates return exit 3;
+`--on-inconclusive warn` returns 0 with a warning without changing the verdict. Exit 1 is an expected result for a
 failed gate, not a program crash. Invalid data/configuration yields exit 2 and an error message.
 
 The HTML gate status is `NOT CONFIGURED` when no thresholds were supplied. The existing Python
@@ -118,8 +121,9 @@ IDs are rejected later by `evaluate`/`compare` against the selected qrels univer
 Text formats accept UTF-8 with optional BOM, LF/CRLF, blank lines, interleaved queries and
 out-of-order rows. IDs are preserved as strings and must be whitespace-free tokens. Comments,
 quoted/multiline fields and format guessing are not supported. BEIR/TREC judgment grades must
-be non-negative decimal integers; negative unjudged markers such as `-1` are rejected rather
-than silently relabeled. Every judged query still requires a positive grade.
+be non-negative decimal integers under strict defaults. `load_qrels(..., strict=False)` and
+low-level qrels readers with `strict=False` preserve signed negative integer markers and
+zero-positive queries for explicit policy handling during evaluation.
 
 Run scores may be finite negative or exponential-notation numbers. Rank labels must be positive
 1-based decimal integers and unique within a query. Gaps are allowed, for example a filtered
@@ -127,8 +131,8 @@ export retaining ranks 2 and 8. Scores must be non-increasing when sorted by dec
 The whole file must use one tag. Repeated query/document pairs are always errors, even when
 values agree. Empty run files are valid and score all judged queries as missing.
 
-Ranks are validation metadata. The evaluator always orders by score descending, then document
-ID ascending; declared ranks do not override a tied score. This strict profile rejects certain
+Ranks are validation metadata. The evaluator orders by score descending, then document
+ID ascending by default (or descending with `tie_breaker="doc_id_desc"`); declared ranks do not override a tied score. This strict profile rejects certain
 historical TREC files accepted by permissive tools (zero-based/repeated ranks, mixed tags,
 nonzero qrels iteration, or score/rank contradictions). Convert those files explicitly under a
 known policy rather than expecting silent repairs.
@@ -149,7 +153,7 @@ validation policy is documented above; NIST evaluation itself sorts by scores an
 ## Evaluation manifests
 
 Both CLI commands accept `--manifest PATH`. This is a separate JSON artifact with schema 1.0,
-kind `evaluation_manifest`; existing result schema 1.0 is unchanged. It records input roles,
+kind `evaluation_manifest`; result artifacts now use schema 1.1. It records input roles,
 base filenames, formats, byte lengths and SHA-256 hashes, package/Python versions, effective
 cutoffs, bootstrap configuration when applicable, query count and whether gates were configured.
 Config and group files are fingerprinted too. The `result_sha256` hashes the result serialized
@@ -192,3 +196,27 @@ positive integers. The core imports no torch, Transformers, or hosted-model SDK.
 The source checkout includes optional `experiments.reranking` training/inference and
 `examples.neural_search` modules. Their models and datasets are opt-in local resources; they
 are research examples, not provider integrations installed with the runtime wheel.
+
+## Policies and result schema 1.1
+
+`evaluate` and `compare` accept `negative_grades="error"`, `no_positive="error"`,
+`tie_breaker="doc_id_asc"`. Negative policies: `error`, `clip` to zero, `drop` the judgment.
+No-positive policies: `error`, `keep` as all-zero metrics, `drop` the topic. Errors remain the
+strict default. Use `load_qrels(path, format="trec", strict=False)` before calling the API
+with non-default policies. CLI loads structural data then applies its explicit policy flags.
+Run IDs are checked against original qrels before any deliberate topic exclusion.
+An all-dropped universe errors; dropped group labels are ignored, unknown labels still error.
+
+Evaluation adds `input_query_count` and `policies`; `query_count` is the evaluated denominator.
+Diagnostics identify changed negative grades and kept/dropped zero-positive queries.
+Comparison adds `status`, `gate_mode`, `multiple_testing`. Gates add `status`, `query_count`,
+`reason`, `evidence` (intervals keyed by `min_value` and/or `max_drop`). Groups add
+`confidence_intervals` when bootstrap is requested. Old numeric metrics and default point-gate
+behavior are preserved; consumers enforcing schema versions should accept 1.1 explicitly.
+Historical reports retain their original schema/version.
+
+Additional `compare` keywords: `gate_mode="point"|"bootstrap"`, `min_queries=20`,
+`multiple_testing="bonferroni"|"none"`; existing `confidence`, `bootstrap_samples`, `seed`
+control sampling. Bootstrap mode requires >=1,000 samples. See [precise decision rules and
+assumptions](EVALUATION.md). CLI provides matching flags. The pytest fixture also accepts
+`on_inconclusive="block"|"warn"` (default block); this is a fixture policy, not a `compare` keyword.

@@ -41,9 +41,9 @@ own `erase` command when starting a fresh local coverage measurement.
 
 ```console
 python -m build
-python scripts/check_sdist.py dist/retrieval_regression-0.3.0.tar.gz
+python scripts/check_sdist.py dist
 python -m twine check dist/*
-python scripts/smoke_wheel.py dist/retrieval_regression-0.3.0-py3-none-any.whl --with-pytest
+python scripts/smoke_wheel.py dist --with-pytest
 ```
 
 Validate the built wheel in a fresh environment with no editable checkout on `sys.path`,
@@ -69,3 +69,7 @@ schema are compatibility surfaces. Do not silently change them to make a benchma
 `work/`, `reports/`, `data/`, `.venv/`, caches, coverage output, and distributions are ignored.
 Commit only deliberate research summaries and compact derived evidence under `docs/reports/`.
 Never commit external raw text corpora or environment files containing secrets/local credentials.
+
+Build into a clean output directory: directory-based checks require exactly one matching artifact.
+The check runner directs child-process temporary files to ignored `work/tmp/`; it does not change
+system-wide TEMP settings.

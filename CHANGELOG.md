@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.3.0 — Unreleased alpha
+## 0.4.0 — Unreleased alpha
+
+- Optional bootstrap quality gates with pass/fail/inconclusive outcomes, per-group intervals,
+  minimum query counts and Bonferroni adjustment across configured bounds.
+- Explicit clip/drop negative grades and keep/drop zero-positive queries, with denominator evidence.
+- Optional descending document-ID ties for trec_eval parity; original default preserved.
+- Concise CLI summaries, silent stdout and explicit inconclusive exit policy.
+- Result schema 1.1 adds policies, gate evidence and status; manifest schema stays 1.0.
+- Python 3.14 CI coverage and version-independent distribution checks.
+- Consolidated evidence navigation, related-tool comparison and offline report preview.
+
+## 0.3.0 — 2026-11-13 (GitHub prerelease)
 
 - Model-independent batched reranking with candidate-score separation and returned Run mappings.
 - Optional local MiniLM neural reranking, controlled random/hard-negative fine-tuning and

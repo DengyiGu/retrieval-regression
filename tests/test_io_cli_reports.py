@@ -54,7 +54,7 @@ def test_html_escapes_user_content_and_json_is_roundtrippable(tmp_path):
     assert "<img src=x>" not in text
     output = tmp_path / "result.json"
     write_json(result, output)
-    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "1.0"
+    assert json.loads(output.read_text(encoding="utf-8"))["schema_version"] == "1.1"
 
 
 def run_cli(*args):
@@ -117,7 +117,7 @@ def test_cli_evaluate_and_version(examples):
     )
     assert result.returncode == 0
     assert json.loads(result.stdout)["query_count"] == 4
-    assert run_cli("--version").stdout.strip() == "0.3.0"
+    assert run_cli("--version").stdout.strip() == "0.4.0"
 
 
 def test_cli_cannot_overwrite_its_inputs(examples, tmp_path):

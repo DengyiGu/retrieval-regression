@@ -30,7 +30,9 @@ def _number(value: Any, location: str, *, nonnegative: bool = False) -> float:
     return number
 
 
-def validate_qrels(value: Any) -> Qrels:
+def validate_qrels(
+    value: Any, *, allow_negative: bool = False, require_positive: bool = True
+) -> Qrels:
     if not isinstance(value, Mapping) or not value:
         raise ValueError("qrels must be a non-empty mapping of query IDs to relevance judgments")
     result: Qrels = {}
@@ -40,11 +42,11 @@ def validate_qrels(value: Any) -> Qrels:
             raise ValueError(f"qrels[{qid!r}] must be a mapping")
         docs = {
             _identifier(doc, f"qrels[{qid!r}] document"): _number(
-                grade, f"qrels[{qid!r}][{doc!r}]", nonnegative=True
+                grade, f"qrels[{qid!r}][{doc!r}]", nonnegative=not allow_negative
             )
             for doc, grade in judgments.items()
         }
-        if not any(grade > 0 for grade in docs.values()):
+        if require_positive and not any(grade > 0 for grade in docs.values()):
             raise ValueError(f"qrels[{qid!r}] must contain at least one positive judgment")
         result[qid] = docs
     return result

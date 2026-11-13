@@ -23,9 +23,11 @@ class EvaluationResult:
     diagnostics: tuple[Diagnostic, ...]
     k: tuple[int, ...]
     query_count: int
+    input_query_count: int = 0
+    policies: dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        return {"schema_version": "1.0", "kind": "evaluation", **asdict(self)}
+        return {"schema_version": "1.1", "kind": "evaluation", **asdict(self)}
 
 
 @dataclass(frozen=True)
@@ -45,6 +47,14 @@ class GateResult:
     min_value: float | None
     max_drop: float | None
     passed: bool
+    status: str = ""
+    query_count: int = 0
+    evidence: dict[str, ConfidenceInterval] = field(default_factory=dict)
+    reason: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.status:
+            object.__setattr__(self, "status", "pass" if self.passed else "fail")
 
 
 @dataclass(frozen=True)
@@ -67,5 +77,21 @@ class ComparisonResult:
     confidence_intervals: dict[str, ConfidenceInterval] = field(default_factory=dict)
     seed: int = 0
 
+    gate_mode: str = "point"
+    multiple_testing: str = "bonferroni"
+
+    @property
+    def status(self) -> str:
+        if not self.gates:
+            return "not_gated"
+        if any(gate.status == "fail" for gate in self.gates):
+            return "fail"
+        return "pass" if self.passed else "inconclusive"
+
     def to_dict(self) -> dict[str, Any]:
-        return {"schema_version": "1.0", "kind": "comparison", **asdict(self)}
+        return {
+            "schema_version": "1.1",
+            "kind": "comparison",
+            **asdict(self),
+            "status": self.status,
+        }

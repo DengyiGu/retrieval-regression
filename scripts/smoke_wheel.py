@@ -26,6 +26,8 @@ def main() -> None:
     parser.add_argument("wheel", type=Path)
     parser.add_argument("--with-pytest", action="store_true")
     args = parser.parse_args()
+    if args.wheel.is_dir():
+        (args.wheel,) = args.wheel.glob("*.whl")
     wheel = args.wheel.resolve(strict=True)
     work = ROOT / "work"
     work.mkdir(exist_ok=True)
@@ -45,6 +47,10 @@ def main() -> None:
             "assert importlib.util.find_spec('pytest') is None; "
             "assert 'site-packages' in rr.__file__; "
             "assert rr.evaluate({'q':{'d':1}}, {'q':{'d':1}}, k=[1]).summary['recall@1']==1; "
+            "assert rr.evaluate({'q':{'d':0}}, {}, no_positive='keep').query_count==1; "
+            "q={'q1':{'d':1},'q2':{'d':1}}; "
+            "assert rr.compare(q,q,q,k=[1],thresholds=[rr.Threshold('ndcg@1',max_drop=.02)], "
+            "gate_mode='bootstrap',bootstrap_samples=1000,min_queries=2).status=='pass'; "
             "assert rr.rerank({'q':'question'}, {'d':'document'}, {'q':{'d':1}}, "
             "lambda pairs: [2.0]) == {'q':{'d':2.0}}"
         )
@@ -63,6 +69,7 @@ def main() -> None:
                 str(ROOT / "examples/toy/qrels.json"),
                 "--run",
                 str(ROOT / "examples/toy/baseline.json"),
+                "--summary",
             ],
             directory,
             "installed CLI entry point",

@@ -16,14 +16,16 @@ resources, API keys, model calls, or runtime dependencies.
 | F4 | Actionable comparisons | Overall and per-query deltas use candidate minus baseline |
 | F5 | Categories | User-supplied query-to-category mapping; unknown queries rejected |
 | F6 | Quality gates | Absolute minimum and/or maximum drop, optionally category-scoped |
-| F7 | CLI integration | Exit 0/1/2 for success/regression/invalid inputs |
+| F7 | CLI integration | Exit 0/1/2/3 for success/regression/invalid/inconclusive |
 | F8 | Reports | JSON schema version and standalone escaped HTML |
 | F9 | pytest plugin | Fixture requires thresholds and exposes understandable failures |
 | F11 | Retrieval-file interoperability | BEIR/TREC profiles, line errors, duplicate/rank checks, independent parity |
 | F12 | Evaluation traceability | Portable input/result fingerprints and changed-input abort before output |
 | F13 | Model-independent reranking | Batched scorer, preserved candidate IDs and compatible returned runs |
 | F14 | Real neural examples | Local inference, controlled adaptation and held-out evaluation outside core |
-| F10 | Optional uncertainty | Seeded paired bootstrap on common query set; assumptions documented |
+| F15 | Explicit data policies | Clip/drop negatives, keep/drop zero-positive topics with denominator evidence |
+| F16 | Bounded CI output | Summary/none stdout independent of full report files |
+| F10 | Optional uncertainty | Seeded overall/group bootstrap, three-state gates, nominal multiplicity adjustment |
 
 ## Non-functional requirements
 

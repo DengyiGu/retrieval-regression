@@ -1,10 +1,11 @@
-"""Command line: 0 success, 1 failed quality gates, 2 invalid input/configuration."""
+"""Command line: 0 success, 1 regression, 2 invalid inputs, 3 inconclusive gates."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -12,8 +13,39 @@ from . import __version__
 from .comparison import compare
 from .evaluation import evaluate
 from .io import load_json, load_qrels, load_run, load_thresholds
+from .models import ComparisonResult, EvaluationResult
 from .provenance import fingerprint, make_manifest, verify_inputs, write_manifest
 from .reporting import write_html, write_json
+
+
+def _print_result(result: EvaluationResult | ComparisonResult, mode: str) -> None:
+    if mode == "none":
+        return
+    if mode == "full":
+        data = result.to_dict()
+    elif isinstance(result, ComparisonResult):
+        data = {
+            "status": result.status,
+            "passed": result.passed,
+            "query_count": result.baseline.query_count,
+            "input_query_count": result.baseline.input_query_count,
+            "baseline": result.baseline.summary,
+            "candidate": result.candidate.summary,
+            "delta": result.delta,
+            "gate_mode": result.gate_mode,
+            "gate_status_counts": dict(Counter(g.status for g in result.gates)),
+            "group_count": len(result.groups),
+            "diagnostic_counts": dict(Counter(d.code for d in result.candidate.diagnostics)),
+        }
+    else:
+        data = {
+            "query_count": result.query_count,
+            "input_query_count": result.input_query_count,
+            "summary": result.summary,
+            "policies": result.policies,
+            "diagnostic_counts": dict(Counter(d.code for d in result.diagnostics)),
+        }
+    print(json.dumps(data, indent=2, ensure_ascii=True, allow_nan=False))
 
 
 def _same_file(left: Path, right: Path) -> bool:
@@ -28,6 +60,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         sub = commands.add_parser(command)
         sub.add_argument("--qrels", required=True)
         sub.add_argument("--qrels-format", choices=["json", "beir", "trec"], default="json")
+        sub.add_argument("--negative-grades", choices=["error", "clip", "drop"], default="error")
+        sub.add_argument("--no-positive", choices=["error", "keep", "drop"], default="error")
+        sub.add_argument(
+            "--tie-breaker", choices=["doc_id_asc", "doc_id_desc"], default="doc_id_asc"
+        )
+        sub.add_argument("--stdout", choices=["full", "summary", "none"], default="full")
+        sub.add_argument("--summary", action="store_const", const="summary", dest="stdout")
         sub.add_argument("--k", nargs="+", type=int, default=[5, 10])
         sub.add_argument("--json", dest="json_output")
         sub.add_argument("--manifest", dest="manifest_output")
@@ -45,6 +84,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             sub.add_argument("--bootstrap-samples", type=int, default=0)
             sub.add_argument("--confidence", type=float, default=0.95)
             sub.add_argument("--seed", type=int, default=0)
+            sub.add_argument("--gate-mode", choices=["point", "bootstrap"], default="point")
+            sub.add_argument("--min-queries", type=int, default=20)
+            sub.add_argument(
+                "--multiple-testing", choices=["bonferroni", "none"], default="bonferroni"
+            )
+            sub.add_argument("--on-inconclusive", choices=["block", "warn"], default="block")
     args = parser.parse_args(argv)
     try:
         input_paths = {
@@ -71,9 +116,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             if args.manifest_output and getattr(args, name, None)
         )
         parameters = {"command": args.command, "k": sorted(set(args.k))}
-        qrels = load_qrels(args.qrels, format=args.qrels_format)
+        policies = {
+            "negative_grades": args.negative_grades,
+            "no_positive": args.no_positive,
+            "tie_breaker": args.tie_breaker,
+        }
+        parameters.update(policies)
+        qrels = load_qrels(args.qrels, format=args.qrels_format, strict=False)
         if args.command == "evaluate":
-            evaluation = evaluate(qrels, load_run(args.run, format=args.run_format), k=args.k)
+            evaluation = evaluate(
+                qrels, load_run(args.run, format=args.run_format), k=args.k, **policies
+            )
             if args.manifest_output:
                 verify_inputs(sources)
             if args.json_output:
@@ -83,7 +136,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     make_manifest(evaluation, sources, parameters, version=__version__),
                     args.manifest_output,
                 )
-            print(json.dumps(evaluation.to_dict(), indent=2, ensure_ascii=True, allow_nan=False))
+            _print_result(evaluation, args.stdout)
             return 0
         comparison = compare(
             qrels,
@@ -95,6 +148,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             bootstrap_samples=args.bootstrap_samples,
             confidence=args.confidence,
             seed=args.seed,
+            gate_mode=args.gate_mode,
+            min_queries=args.min_queries,
+            multiple_testing=args.multiple_testing,
+            **policies,
         )
         if args.manifest_output:
             verify_inputs(sources)
@@ -103,6 +160,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                     "bootstrap_samples": args.bootstrap_samples,
                     "confidence": args.confidence,
                     "seed": args.seed,
+                    "gate_mode": args.gate_mode,
+                    "min_queries": args.min_queries,
+                    "multiple_testing": args.multiple_testing,
+                    "on_inconclusive": args.on_inconclusive,
                 }
             )
         if args.json_output:
@@ -114,7 +175,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 make_manifest(comparison, sources, parameters, version=__version__),
                 args.manifest_output,
             )
-        print(json.dumps(comparison.to_dict(), indent=2, ensure_ascii=True, allow_nan=False))
+        _print_result(comparison, args.stdout)
+        if comparison.status == "inconclusive":
+            print(
+                "warning: quality gates are inconclusive; collect more independent queries "
+                "or explicitly choose --on-inconclusive warn",
+                file=sys.stderr,
+            )
+            return 0 if args.on_inconclusive == "warn" else 3
         return 0 if comparison.passed else 1
     except (ValueError, OSError, TypeError) as exc:
         print(f"error: {exc}", file=sys.stderr)

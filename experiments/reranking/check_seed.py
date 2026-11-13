@@ -13,7 +13,7 @@ from experiments.reranking.training import load_model, seed_everything, train_mo
 from retrieval_regression import evaluate
 from retrieval_regression.io import load_json
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def main():

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,10 +21,12 @@ COMMANDS = [
 
 
 def main() -> int:
-    (ROOT / "work").mkdir(exist_ok=True)
+    temporary = ROOT / "work" / "tmp"
+    temporary.mkdir(parents=True, exist_ok=True)
+    env = {**os.environ, **dict.fromkeys(("TEMP", "TMP", "TMPDIR"), str(temporary))}
     for command in COMMANDS:
         print("Running: python -m " + " ".join(command), flush=True)
-        result = subprocess.run([sys.executable, "-m", *command], cwd=ROOT, check=False)
+        result = subprocess.run([sys.executable, "-m", *command], cwd=ROOT, env=env, check=False)
         if result.returncode:
             return result.returncode
     print("All local checks passed.")

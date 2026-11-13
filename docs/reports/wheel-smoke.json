@@ -1,8 +1,0 @@
-{
-  "wheel": "retrieval_regression-0.1.0-py3-none-any.whl",
-  "sha256": "07d3139dec0caffc772ff9d27bded22a905d8adca523d75f5fc9c22754bd37f0",
-  "core_without_dependencies": true,
-  "module_entry_point": true,
-  "cli_entry_point": true,
-  "pytest_plugin": true
-}

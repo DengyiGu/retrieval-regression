@@ -47,9 +47,14 @@ def write_html(result: ComparisonResult, path: str | Path) -> None:
     )
     gate_items = (
         "".join(
-            f"<li>{'PASS' if gate.passed else 'FAIL'}: {escape(gate.metric)} "
+            f"<li>{gate.status.upper()}: {escape(gate.metric)} "
             f"({escape(gate.group or 'overall')}), min={gate.min_value}, "
-            f"max absolute drop={gate.max_drop}</li>"
+            f"max absolute drop={gate.max_drop}; n={gate.query_count}. {escape(gate.reason)}"
+            + "".join(
+                f"; {escape(name)} interval [{ci.low:+.6f}, {ci.high:+.6f}] ({ci.confidence:.2%})"
+                for name, ci in gate.evidence.items()
+            )
+            + "</li>"
             for gate in result.gates
         )
         or "<li>No thresholds configured; quality was not gated.</li>"
@@ -57,7 +62,14 @@ def write_html(result: ComparisonResult, path: str | Path) -> None:
     group_sections = "".join(
         f"<h3>{escape(group)} ({values['query_count']} queries)</h3><ul>"
         + "".join(
-            f"<li>{escape(metric)}: {change:+.6f}</li>"
+            f"<li>{escape(metric)}: {change:+.6f}"
+            + (
+                f" [{values['confidence_intervals'][metric]['low']:+.6f}, "
+                f"{values['confidence_intervals'][metric]['high']:+.6f}]"
+                if "confidence_intervals" in values
+                else ""
+            )
+            + "</li>"
             for metric, change in values["delta"].items()
         )
         + "</ul>"
@@ -71,25 +83,30 @@ def write_html(result: ComparisonResult, path: str | Path) -> None:
         )
         or "<li>Bootstrap intervals not requested.</li>"
     )
-    status = ("PASS" if result.passed else "FAIL") if result.gates else "NOT CONFIGURED"
+    status = result.status.upper() if result.gates else "NOT CONFIGURED"
     content = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>Retrieval Regression Report</title><style>
 body{{font:16px system-ui,sans-serif;max-width:1050px;margin:40px auto;padding:0 20px;
 color:#172033}}
+h1{{color:#164e63}}strong{{background:#e0f2fe;padding:5px 10px;border-radius:6px}}
+h2{{margin-top:32px}}
 table{{border-collapse:collapse;width:100%;margin:20px 0}}th,td{{border:1px solid #ccd2dc;
 padding:10px;text-align:left}}thead{{background:#eef2f8}}code{{background:#eef2f8;padding:2px}}
 </style></head><body><h1>Retrieval Regression</h1>
 <p>Gate status: <strong>{status}</strong>. Evaluated queries: {result.baseline.query_count}.</p>
-<p>Delta = candidate minus baseline. Every qrels query is included; missing rankings score zero.</p>
+<p>Delta = candidate minus baseline. Every eligible qrels query is included;
+missing rankings score zero.</p>
 <h2>Overall metrics</h2><table><thead><tr><th>Metric</th><th>Baseline</th><th>Candidate</th>
 <th>Delta</th></tr></thead><tbody>{rows}</tbody></table>
-<h2>Quality gates</h2><ul>{gate_items}</ul>
+<h2>Quality gates ({escape(result.gate_mode)})</h2><ul>{gate_items}</ul>
 <h2>Query changes ({escape(focus)}, worst first)</h2><table><thead><tr><th>Query</th>
 <th>Baseline</th><th>Candidate</th><th>Delta</th></tr></thead><tbody>{query_rows}</tbody></table>
 <h2>Category changes</h2>{group_sections or "<p>No categories supplied.</p>"}
 <h2>Descriptive confidence intervals</h2><ul>{intervals}</ul>
-<p>Intervals do not establish causality and do not control multiple comparisons.</p>
+<p>Descriptive intervals above are unadjusted. Gate evidence uses the configured
+{escape(result.multiple_testing)} correction across configured bounds. Percentile bootstrap
+coverage is approximate and assumes independent queries. Evidence can be inconclusive.</p>
 <h2>Input diagnostics</h2><ul>{diagnostics}</ul>
 <p>Unjudged documents count as non-relevant. Incomplete judgments limit interpretation.</p>
 </body></html>

@@ -67,14 +67,16 @@ def load_thresholds(path: str | Path) -> tuple[Threshold, ...]:
     return tuple(result)
 
 
-def load_qrels(path: str | Path, *, format: Literal["json", "beir", "trec"] = "json") -> Qrels:
-    """Load validated judgments using an explicit format; never guess by extension."""
+def load_qrels(
+    path: str | Path, *, format: Literal["json", "beir", "trec"] = "json", strict: bool = True
+) -> Qrels:
+    """Load judgments in an explicit format; strict=False retains raw grades for policies."""
     if format == "json":
-        return validate_qrels(load_json(path))
+        return validate_qrels(load_json(path), allow_negative=not strict, require_positive=strict)
     if format == "beir":
-        return read_beir_qrels(path)
+        return read_beir_qrels(path, strict=strict)
     if format == "trec":
-        return read_trec_qrels(path)
+        return read_trec_qrels(path, strict=strict)
     raise ValueError(f"unknown qrels format {format!r}")
 
 

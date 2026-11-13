@@ -1,0 +1,44 @@
+{
+  "kind": "synthetic_calibration",
+  "seed": 20261113,
+  "trials_per_scenario": 300,
+  "queries": 30,
+  "metric": "ndcg@1",
+  "max_drop": 0.02,
+  "confidence": 0.95,
+  "bootstrap_samples": 2000,
+  "baseline_hit_probability": 0.7,
+  "candidate_hit_probabilities": {
+    "equal_quality": 0.7,
+    "regression": 0.45
+  },
+  "independent_query_and_system_bernoulli_draws": true,
+  "scenarios": {
+    "equal_quality": {
+      "point": {
+        "fail": 137,
+        "pass": 163
+      },
+      "bootstrap": {
+        "inconclusive": 278,
+        "pass": 15,
+        "fail": 7
+      }
+    },
+    "regression": {
+      "point": {
+        "fail": 293,
+        "pass": 7
+      },
+      "bootstrap": {
+        "fail": 142,
+        "inconclusive": 158
+      }
+    }
+  },
+  "limitations": [
+    "Synthetic distribution, not a real-world false-alarm guarantee",
+    "Inconclusive results block by default; fewer false failures do not mean more passes",
+    "Percentile coverage is approximate; repeated runs/selection need separate control"
+  ]
+}

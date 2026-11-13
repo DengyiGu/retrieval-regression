@@ -32,6 +32,6 @@ Raw datasets, training pairs, local instructions and credentials are not distrib
 The release is public and contains the 83,464,572-byte model archive and a separate checksum
 file. The public archive was downloaded without authentication, its SHA-256 verified, and the
 extracted model/tokenizer successfully loaded for two short inference examples. Exact artifact
-hashes and the passing nine-job code CI result are in [the publication record](model-publication.json).
+hashes are published with the Release; current source checks are linked from the README.
 The model is labeled a research preview; no separate repository or Git-history weight blobs
 were introduced.

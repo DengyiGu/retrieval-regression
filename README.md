@@ -1,12 +1,15 @@
 # Retrieval Regression
 
+[![CI](https://github.com/DengyiGu/retrieval-regression/actions/workflows/ci.yml/badge.svg)](https://github.com/DengyiGu/retrieval-regression/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](pyproject.toml)
+
 **Catch retrieval quality regressions before they reach your RAG application.**
 
 A local-first Python library for comparing search results, finding query-level regressions,
 and enforcing quality thresholds in automated tests. No paid APIs, LLM judges, GPU, or runtime
 dependencies are required for the core library.
 
-**Status:** working alpha (`0.3.0`). Install from this repository; no PyPI release is claimed.
+**Status:** working alpha (`0.4.0` source; latest model release `v0.3.0`). Install from this repository; no PyPI release is claimed.
 
 ## The problem
 
@@ -25,11 +28,14 @@ rankings, and want a repeatable pass/fail check in CI. For example, accept an in
 if overall NDCG@10 drops by no more than 0.02 and an important query category keeps Recall@10
 above its minimum. Keep corpus IDs and judgment semantics stable across the two runs.
 
-Established tools such as [ir-measures](https://ir-measur.es/en/latest/) already provide a much
-broader metric catalog, and [BEIR](https://github.com/beir-cellar/beir) provides datasets and
-retrieval benchmarks. This project's focus is a small regression-testing workflow: strict inputs,
-paired differences, category gates, pytest failures, and an offline report. The metric formulas
-are standard. If you only need metric calculation, an existing evaluator may be sufficient.
+[ranx](https://amenra.github.io/ranx/compare/) is the closest established alternative: it
+compares multiple systems and supplies statistical tests, alongside a broader evaluation and
+fusion toolkit. Use it for multi-system research comparisons. This project's narrower focus
+is a regression budget workflow: per-category absolute budgets, explicit
+**pass / fail / inconclusive** decisions, pytest/CLI enforcement, input fingerprints and an
+offline report, with no runtime dependencies. This is a workflow choice, not a claim of better
+statistics or speed. [ir-measures](https://ir-measur.es/en/latest/) covers many more metrics;
+[BEIR](https://github.com/beir-cellar/beir) provides datasets and retrieval benchmarks.
 
 Changing chunk boundaries or document IDs requires corresponding judgment mapping; this library
 does not create that mapping. It also needs external judgments and cannot assess generated answers.
@@ -103,9 +109,48 @@ python -m retrieval_regression compare --qrels examples/toy/qrels.json --baselin
 ```
 
 Use the virtual environment's Python path if it is not activated. The command writes reports
-and prints JSON to stdout. Replace `candidate.json` with `regressed.json` to demonstrate a
-failed gate. Exit codes: **0** success, **1** failed quality gate, **2** invalid input/configuration.
+and prints full JSON by default. Add `--summary` for bounded CI output or `--stdout none`
+to write files only. `--json` always retains full query-level evidence. Replace `candidate.json` with `regressed.json` to demonstrate a
+failed gate. Exit codes: **0** success, **1** failed quality gate, **2** invalid input/configuration, **3** inconclusive statistical gates (blocked by default).
 No configured thresholds means comparison only, not quality enforcement.
+
+## Uncertainty-aware regression gates
+
+Point gates remain the backward-compatible default. To avoid treating a noisy sample mean
+as conclusive evidence, request percentile bootstrap gates on independent held-out queries:
+
+```python
+result = compare(
+    qrels,
+    baseline,
+    candidate,
+    k=[10],
+    thresholds=[Threshold("ndcg@10", max_drop=0.02)],
+    gate_mode="bootstrap",
+    bootstrap_samples=5000,
+    confidence=0.95,
+    min_queries=20,
+    seed=42,
+)
+print(result.status)  # pass, fail, inconclusive, or not_gated
+```
+
+For `max_drop=0.02`, a delta interval entirely above -0.02 passes; entirely below it fails;
+an overlapping interval is inconclusive. Categories are resampled separately. Gate bounds
+use a Bonferroni adjustment by default; descriptive metric/group intervals remain unadjusted.
+CLI: add `--gate-mode bootstrap --bootstrap-samples 5000 --summary`. Inconclusive blocks
+with exit 3; `--on-inconclusive warn` explicitly permits continuation with a warning and keeps
+the result inconclusive. The pytest fixture accepts the same policy.
+
+A seeded 300-trial, 30-query synthetic A/A check produced **137 point failures versus
+7 bootstrap failures, 278 inconclusive results and 15 passes**. Fewer definite failures do
+not imply more safe approvals: small samples often cannot establish non-inferiority.
+Coverage is approximate, particularly for sparse/degenerate samples; the minimum query count
+is a guardrail, not a statistical guarantee. See [evidence and limitations](docs/EVIDENCE.md).
+
+![Offline HTML report showing metric deltas and gate evidence](docs/assets/report.png)
+
+The screenshot uses synthetic demonstration data; it is not a measured model improvement.
 
 ## Standard retrieval files and reproducible runs
 
@@ -128,9 +173,19 @@ python -m retrieval_regression compare --qrels examples/formats/qrels.tsv --qrel
 
 Parsers reject duplicate judgments/documents/ranks, mixed run tags, invalid headers and
 non-finite scores with file/line diagnostics. Ranks are checked against scores; scoring still
-uses descending scores and ascending document IDs for ties. The adapters intentionally support
+uses descending scores and ascending document IDs for ties by default. This differs from
+`trec_eval` and the `ir-measures` pytrec_eval provider on tied scores; select
+`tie_breaker="doc_id_desc"` / `--tie-breaker doc_id_desc` for that ordering. The adapters intentionally support
 [a documented strict profile](docs/API.md#file-format-profiles), rather than every historical
-TREC variant. Missing queries remain in the evaluation denominator.
+TREC variant. Missing rankings remain in the evaluation denominator.
+
+Negative grades and topics without positives are rejected by default. For collections that
+contain them, load with `load_qrels(..., strict=False)`, then choose explicit evaluation policies:
+`negative_grades="clip"` (replace negatives with zero) or `"drop"` (remove those judgments),
+and `no_positive="keep"` (zero metrics) or `"drop"` (exclude those topics). CLI uses
+`--negative-grades clip --no-positive keep`. Reports retain policy diagnostics and both input
+and evaluated query counts; dropping topics changes the denominator. These options do not
+relax duplicate, malformed-row or non-finite-number checks.
 
 An optional manifest records SHA-256/size/format for every input (including gates and groups),
 evaluator/Python versions, parameters and a canonical result fingerprint. It contains base
@@ -156,9 +211,9 @@ with random-negative and hard-negative fine-tuning, selects on a training-derive
 split, and reports every variant on SciFact and NFCorpus held-out tests.
 
 [The measured neural report](docs/reports/2026-11-12-neural.md) includes actual training,
-model-quality and GPU-memory results. Small single-seed experiments support local observations;
+model-quality and GPU-memory results. Two checked random-negative seeds and one hard-negative run support local observations;
 they do not establish universal gains. Dataset and pretrained-weight terms remain separate
-from the code license; weights and raw texts are not redistributed.
+from the code license; raw texts are not redistributed; adapted weights are separately available in the Release below.
 
 ## Download the adapted model
 
@@ -208,14 +263,15 @@ Try `python -m pytest examples/test_retrieval_quality.py -q`.
 - Optional input/result fingerprints for portable, auditable evaluation records.
 - Deterministic tie handling and diagnostics for unjudged retrieved documents.
 - Overall and user-defined category comparisons, with absolute quality-drop budgets.
-- Optional seeded paired-bootstrap intervals for overall metric deltas.
+- Seeded overall/category paired-bootstrap intervals and optional three-state statistical gates.
+- Explicit negative-grade / zero-positive-topic policies and concise CLI summaries.
 - Local HTML/JSON reports, Python API, CLI, and pytest integration.
 - Hand-calculated tests and optional independent checks against `ir-measures`.
 
 ## Evaluation conventions
 
-- Every query in qrels is evaluated. Each must have at least one positive judgment.
-- Retrieval scores sort descending; ties break by ascending document ID.
+- Every eligible query in qrels is evaluated. Strict defaults require positives; explicit policies can keep or drop zero-positive topics.
+- Retrieval scores sort descending; ties default to ascending document ID, optionally descending for trec_eval parity.
 - Positive relevance grades count as relevant for binary metrics.
 - NDCG uses **linear graded gain**, matching `trec_eval`'s `ndcg_cut` convention.
 - Unjudged documents count as non-relevant; incomplete judgments limit interpretation.
@@ -231,7 +287,9 @@ Full definitions, limitations, and statistical assumptions: [evaluation protocol
 src/retrieval_regression/    Metrics, validation, comparisons, reports, CLI, pytest plugin
 tests/                      Correctness, integration, and independent-reference checks
 examples/                   Offline toy data and runnable usage
-benchmarks/                 SciFact validation and synthetic evaluator benchmark
+benchmarks/                 SciFact validation, evaluator scaling and gate calibration
+experiments/reranking/      Optional local Transformer inference and fine-tuning
+scripts/                    Reusable development, packaging and install checks
 docs/                       Requirements, architecture, research protocol and roadmap
 ```
 
@@ -239,19 +297,16 @@ docs/                       Requirements, architecture, research protocol and ro
 
 Start with [development setup](docs/DEVELOPMENT.md), [requirements](docs/REQUIREMENTS.md),
 and the [roadmap](docs/ROADMAP.md). Run `python scripts/check.py` after changes.
-The synthetic example demonstrates behavior; **it is not evidence of real-world retrieval gains**.
-No benchmark speedups, model improvements, or external adoption are claimed.
+The synthetic example demonstrates behavior. The [evidence guide](docs/EVIDENCE.md) collects
+specific findings and limitations: noisy gate calibration, real qrels compatibility, and
+held-out neural results. SciFact improvement is a measured local result; external NFCorpus
+improvement is not established. No universal model improvement, evaluator speedup or external
+adoption is claimed.
 
-A public SciFact experiment is included in `benchmarks/scifact.py`; install `.[benchmark]`
-and run `python benchmarks/scifact.py --download` once, then rerun offline without that flag.
-See [the validation report](docs/reports/2026-11-12-validation.md) for measured outcomes and
-[the follow-up review](docs/reports/2026-11-12-review.md) for audit fixes and remaining limits.
-The [format audit](docs/reports/2026-11-12-formats.md) checks original BEIR judgments and
-60,000 exported TREC rows against JSON results and an independent evaluator. It also records
-synthetic measurements up to 10,000 queries. Parsers retain full mappings in memory;
-large-run streaming and broader model validation remain on the roadmap. A separate
-[neural experiment](docs/reports/2026-11-12-neural.md) adds SciFact/NFCorpus evaluation.
-See [research protocol](docs/RESEARCH.md).
+Run `python benchmarks/scifact.py --download` for the lexical experiment after installing
+`.[benchmark]`; rerun offline once cached. Run `python benchmarks/gate_calibration.py` for the
+small CPU-only gate simulation. The [neural experiment](experiments/reranking/README.md)
+contains the optional model workflow. Large-run streaming remains future work.
 
 ## Maintainer
 

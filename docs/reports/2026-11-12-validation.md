@@ -106,7 +106,7 @@ not proof that every future input or environment is correct.
 ## Local verification
 
 The local checks use Windows and Python 3.11.3. Current test results and final packaging smoke
-checks are recorded in [the verification summary](validation-summary.json). The check suite covers hand calculations,
+checks are recorded in the local verification record. The check suite covers hand calculations,
 missing/empty queries, score ties, invalid values, strict JSON, gates, bootstrap reproducibility,
 HTML escaping, CLI exit paths, plugin discovery, and independent metric agreement.
 
@@ -142,8 +142,6 @@ Committed compact evidence:
 - [Dataset, source-file fingerprints, software versions, configuration and aggregate results](scifact-summary.json)
 - [All 300 query-level deltas](scifact-query-deltas.json)
 - [Synthetic evaluator measurement](synthetic-evaluator-summary.json)
-- [Observed local and remote verification summary](validation-summary.json)
-- [Clean-wheel smoke verification](wheel-smoke.json)
 
 The experiment was executed on uncommitted implementation work. Its recorded base Git commit
 and dirty flag are retained honestly; per-source-file SHA-256 fingerprints identify the tested
@@ -157,7 +155,7 @@ answer evaluation, streaming million-query run, or cross-platform execution was 
 The [follow-up GitHub CI run](https://github.com/DengyiGu/retrieval-regression/actions/runs/43203547573) for commit
 `8f18182` passed all nine jobs: Windows/Linux on Python 3.10-3.13, plus
 independent-reference, source-archive and clean-wheel installation checks. See the
-[follow-up review](2026-11-12-review.md) for the additional audit fixes.
+[current evidence guide](../EVIDENCE.md) for the additional audit fixes.
 PyPI publication has not occurred.
 
 Next: add strict BEIR/TREC adapters, validate another domain and a pinned neural retriever where

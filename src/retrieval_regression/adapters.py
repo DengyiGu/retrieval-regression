@@ -56,7 +56,7 @@ def _score(value: str, path: str | Path, line: int) -> float:
     return score
 
 
-def _judgments(path: str | Path, *, beir: bool) -> Qrels:
+def _judgments(path: str | Path, *, beir: bool, strict: bool = True) -> Qrels:
     result: Qrels = {}
     first_lines: dict[str, int] = {}
     rows = _rows(path, tabs=beir)
@@ -79,7 +79,10 @@ def _judgments(path: str | Path, *, beir: bool) -> Qrels:
                 raise InputFormatError(path, line, "TREC qrels iteration must be 0")
         qid = _token(qid, path, line, "query ID")
         doc = _token(doc, path, line, "document ID")
-        grade = _integer(text_grade, path, line, "relevance grade")
+        if not strict and text_grade.startswith("-"):
+            grade = -_integer(text_grade[1:], path, line, "relevance grade")
+        else:
+            grade = _integer(text_grade, path, line, "relevance grade")
         try:
             number = float(grade)
         except OverflowError as exc:
@@ -94,21 +97,21 @@ def _judgments(path: str | Path, *, beir: bool) -> Qrels:
     if not result:
         raise InputFormatError(path, None, "qrels must contain relevance judgments")
     for qid, docs in result.items():
-        if not any(grade > 0 for grade in docs.values()):
+        if strict and not any(grade > 0 for grade in docs.values()):
             raise InputFormatError(
                 path, first_lines[qid], f"query {qid!r} needs at least one positive judgment"
             )
     return result
 
 
-def read_beir_qrels(path: str | Path) -> Qrels:
+def read_beir_qrels(path: str | Path, *, strict: bool = True) -> Qrels:
     """Read headered three-column BEIR TSV with non-negative integer grades."""
-    return _judgments(path, beir=True)
+    return _judgments(path, beir=True, strict=strict)
 
 
-def read_trec_qrels(path: str | Path) -> Qrels:
+def read_trec_qrels(path: str | Path, *, strict: bool = True) -> Qrels:
     """Read four-column qid/0/doc/grade TREC qrels; reject negative/unjudged grades."""
-    return _judgments(path, beir=False)
+    return _judgments(path, beir=False, strict=strict)
 
 
 def read_trec_run(path: str | Path) -> Run:

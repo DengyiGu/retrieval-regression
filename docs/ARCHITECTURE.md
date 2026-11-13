@@ -31,10 +31,10 @@ Optional adapters should translate inputs into the same internal contracts.
 
 1. **qrels determines queries.** Never use run keys or the intersection of two runs as the denominator.
 2. **Unknown query IDs are errors.** Accidental dataset mixing should not silently produce a score.
-3. **Positive judgments are required.** Queries with no positive judgments are rejected explicitly.
+3. **Explicit judgment policies.** Positives are required by default; keep/drop policies retain denominator diagnostics.
 4. **Linear NDCG gains.** Independent parity with `trec_eval` conventions is easier to audit.
 5. **Document-ID tie break.** Ordering is deterministic, though tied-run results may differ from
-   tools with other tie conventions. Reference parity tests therefore avoid score ties.
+   tools with other tie conventions. An optional descending-ID mode has a tied-score pytrec_eval parity check.
 6. **No runtime dependencies.** Transparent correctness and installation are prioritized over
    large-run throughput in the alpha. Validate scale before adding a dependency.
 7. **Explicit enforcement.** A plain comparison may have no gates; the pytest fixture must have one.
@@ -45,7 +45,8 @@ For Q queries with R retrieved documents and J judgments each, sorting is roughl
 O(Q * (R log R + J log J)). Comparisons retain per-query data for both runs. Bootstrap adds
 O(B * Q * M) work for B samples and M metrics. JSON, reports, and results are materialized in
 memory; million-query runs are outside the current scalability claim. HTML includes all query
-rows. Confidence intervals are currently overall only, not category-specific.
+rows. Overall and category intervals are supported; group membership controls resampling.
+Bootstrap means are reused for equal per-query value vectors across metrics/bounds.
 
 ## Extensibility
 

@@ -35,7 +35,8 @@ Recorded time and traced allocations; no evaluator optimization is claimed.
 Remaining: profile deeper runs and inspect result/report overhead before optimizing. Record time and peak
 memory, including per-query result overhead. Investigate top-K selection, result/report size,
 report pagination, and eventual streaming only when measurements justify them.
-Add multi-label categories or uncertainty within categories only with explicit semantics.
+Delivered in 0.4.0: category intervals and bounded CLI summaries.
+Remaining: multi-label categories and paginated/streamed reporting.
 
 Acceptance: report exact tested scales and tradeoffs; no universal performance claim from one laptop.
 
@@ -59,3 +60,10 @@ Prioritize reusable retrieval/model functions and measured experiments. Keep res
 training optional and separate from the runtime core. Expand candidate generation, training
 objectives and multilingual evaluation through evidence-backed iterations; avoid unrelated
 infrastructure that does not improve these workflows.
+
+## M5 - Statistical regression decisions - delivered in 0.4.0 source
+
+Three-state percentile-bootstrap gates, per-category evidence, nominal Bonferroni adjustment,
+explicit inconclusive CI policy and seeded small-sample A/A/regression calibration.
+Next: benchmark power and coverage across query dependence/sparsity and investigate alternative
+interval methods before making broad statistical guarantees.
