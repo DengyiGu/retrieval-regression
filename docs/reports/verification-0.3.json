@@ -1,0 +1,47 @@
+{
+  "version": "0.3.0",
+  "date": "2026-11-12",
+  "tests_passed": 160,
+  "optional_torch_case_skipped_in_core_environment": 1,
+  "optional_torch_gradient_test_in_neural_environment": "passed",
+  "standalone_example_passed": 1,
+  "lint": "passed",
+  "format": "passed",
+  "strict_source_typing": "passed",
+  "coverage": {
+    "covered_lines": 585,
+    "num_statements": 595,
+    "percent_covered": 98.0319803198032,
+    "percent_covered_display": "98",
+    "missing_lines": 10,
+    "excluded_lines": 0,
+    "percent_statements_covered": 98.31932773109244,
+    "percent_statements_covered_display": "98",
+    "num_branches": 218,
+    "num_partial_branches": 6,
+    "covered_branches": 212,
+    "missing_branches": 6,
+    "percent_branches_covered": 97.24770642201835,
+    "percent_branches_covered_display": "97"
+  },
+  "gpu_training_and_two_dataset_evaluation": "completed",
+  "independent_metric_values_checked": 96,
+  "local_search_example": "passed",
+  "package_validation": {
+    "isolated_sdist_and_wheel": "passed",
+    "source_archive_index_check": "passed",
+    "twine_check": "passed",
+    "wheel_smoke": {
+      "wheel": "retrieval_regression-0.3.0-py3-none-any.whl",
+      "sha256": "a285a9454faf07e9f7787f9c576f390fe7299c54091afc16f506b9a4d52da361",
+      "core_without_dependencies": true,
+      "module_entry_point": true,
+      "cli_entry_point": true,
+      "pytest_plugin": true,
+      "file_adapters_and_manifest": true
+    }
+  },
+  "remote_ci": {
+    "status": "pending publication"
+  }
+}

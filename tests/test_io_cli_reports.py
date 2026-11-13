@@ -117,7 +117,7 @@ def test_cli_evaluate_and_version(examples):
     )
     assert result.returncode == 0
     assert json.loads(result.stdout)["query_count"] == 4
-    assert run_cli("--version").stdout.strip() == "0.2.0"
+    assert run_cli("--version").stdout.strip() == "0.3.0"
 
 
 def test_cli_cannot_overwrite_its_inputs(examples, tmp_path):

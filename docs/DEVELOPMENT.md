@@ -41,9 +41,9 @@ own `erase` command when starting a fresh local coverage measurement.
 
 ```console
 python -m build
-python scripts/check_sdist.py dist/retrieval_regression-0.2.0.tar.gz
+python scripts/check_sdist.py dist/retrieval_regression-0.3.0.tar.gz
 python -m twine check dist/*
-python scripts/smoke_wheel.py dist/retrieval_regression-0.2.0-py3-none-any.whl --with-pytest
+python scripts/smoke_wheel.py dist/retrieval_regression-0.3.0-py3-none-any.whl --with-pytest
 ```
 
 Validate the built wheel in a fresh environment with no editable checkout on `sys.path`,

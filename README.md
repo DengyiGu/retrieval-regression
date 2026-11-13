@@ -6,7 +6,7 @@ A local-first Python library for comparing search results, finding query-level r
 and enforcing quality thresholds in automated tests. No paid APIs, LLM judges, GPU, or runtime
 dependencies are required for the core library.
 
-**Status:** working alpha (`0.2.0`). Install from this repository; no PyPI release is claimed.
+**Status:** working alpha (`0.3.0`). Install from this repository; no PyPI release is claimed.
 
 ## The problem
 
@@ -137,6 +137,29 @@ evaluator/Python versions, parameters and a canonical result fingerprint. It con
 filenames rather than machine-specific absolute paths. Input contents are rechecked before
 reports are written. Keep the original input files with the manifest to reproduce a run.
 
+## Neural reranking and local model experiments
+
+`rerank(queries, corpus, run, scorer, top_k=50, batch_size=32)` connects candidate rankings to
+any pair scorer that returns one numeric score per query/document text pair. It has no model
+provider dependency. The optional [neural experiment](experiments/reranking/README.md) provides
+an actual Transformer scorer, model fine-tuning and local search:
+
+```console
+python -m pip install -e '.[benchmark,neural]'
+python -m experiments.reranking.run --download
+python -m examples.neural_search --query "Does smoking increase cancer risk?" --dataset scifact
+```
+
+Install a suitable CUDA PyTorch build for GPU use. Downloads are opt-in; after caching, model
+inference/training runs locally. The experiment compares a pinned pretrained MiniLM reranker
+with random-negative and hard-negative fine-tuning, selects on a training-derived validation
+split, and reports every variant on SciFact and NFCorpus held-out tests.
+
+[The measured neural report](docs/reports/2026-11-12-neural.md) includes actual training,
+model-quality and GPU-memory results. Small single-seed experiments support local observations;
+they do not establish universal gains. Dataset and pretrained-weight terms remain separate
+from the code license; weights and raw texts are not redistributed.
+
 ## pytest integration
 
 The optional plugin registers the `retrieval_check` fixture:
@@ -161,6 +184,8 @@ Try `python -m pytest examples/test_retrieval_quality.py -q`.
 ## Available now
 
 - Recall@K, Precision@K, MRR@K, and graded NDCG@K.
+- Batched, model-independent reranking with caller-supplied scoring.
+- Optional local neural inference, controlled fine-tuning ablation and a usable search example.
 - Fixed-query macro averaging, including missing and empty rankings as zero.
 - Strict JSON, original BEIR qrels TSV, TREC qrels and TREC run loading.
 - File/line errors for duplicate rows, invalid ranks, mixed tags and score/rank conflicts.
@@ -208,7 +233,8 @@ See [the validation report](docs/reports/2026-11-12-validation.md) for measured 
 The [format audit](docs/reports/2026-11-12-formats.md) checks original BEIR judgments and
 60,000 exported TREC rows against JSON results and an independent evaluator. It also records
 synthetic measurements up to 10,000 queries. Parsers retain full mappings in memory;
-large-run streaming, additional domains and neural retrieval validation remain on the roadmap.
+large-run streaming and broader model validation remain on the roadmap. A separate
+[neural experiment](docs/reports/2026-11-12-neural.md) adds SciFact/NFCorpus evaluation.
 See [research protocol](docs/RESEARCH.md).
 
 ## Maintainer

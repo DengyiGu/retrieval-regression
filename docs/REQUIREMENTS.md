@@ -21,6 +21,8 @@ resources, API keys, model calls, or runtime dependencies.
 | F9 | pytest plugin | Fixture requires thresholds and exposes understandable failures |
 | F11 | Retrieval-file interoperability | BEIR/TREC profiles, line errors, duplicate/rank checks, independent parity |
 | F12 | Evaluation traceability | Portable input/result fingerprints and changed-input abort before output |
+| F13 | Model-independent reranking | Batched scorer, preserved candidate IDs and compatible returned runs |
+| F14 | Real neural examples | Local inference, controlled adaptation and held-out evaluation outside core |
 | F10 | Optional uncertainty | Seeded paired bootstrap on common query set; assumptions documented |
 
 ## Non-functional requirements
@@ -37,7 +39,7 @@ resources, API keys, model calls, or runtime dependencies.
 ## Initial boundaries
 
 Input is nested JSON/Python mappings or explicit BEIR/TREC judgment/ranking files with document IDs and scores, not raw documents.
-The library does not run a vector database, train models, judge generated answers, infer
+The runtime library does not run a vector database, train models, judge generated answers, infer
 root causes, or detect every kind of dataset leakage. It reports measured differences;
 users determine why a pipeline changed.
 
@@ -46,3 +48,6 @@ users determine why a pipeline changed.
 Runnable API/CLI/plugin, documented conventions, meaningful tests, independent metric parity,
 source and wheel builds, example pass/fail paths, and honest limitations. The next research
 milestone requires public-data experiments and traceable artifacts, not a README claim.
+
+Optional source experiments may train small rerankers in a separate environment and use the
+runtime library for evaluation; this does not add ML dependencies to the core.

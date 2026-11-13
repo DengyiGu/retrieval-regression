@@ -5,6 +5,7 @@ from .comparison import compare
 from .evaluation import evaluate
 from .io import load_qrels, load_run
 from .models import ComparisonResult, EvaluationResult, Threshold
+from .reranking import rerank
 
 __all__ = [
     "ComparisonResult",
@@ -15,5 +16,6 @@ __all__ = [
     "evaluate",
     "load_qrels",
     "load_run",
+    "rerank",
 ]
-__version__ = "0.2.0"
+__version__ = "0.3.0"

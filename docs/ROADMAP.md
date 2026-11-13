@@ -41,7 +41,12 @@ Acceptance: report exact tested scales and tradeoffs; no universal performance c
 
 ## M4 — Broader evidence and release readiness
 
-Use another public domain and a fixed neural retriever/reranker when justified. Pin model
+Delivered in 0.3.0: pinned neural reranking, two controlled one-epoch adaptation conditions,
+SciFact and external NFCorpus tests, validation-only selection, and a local search command.
+The experiment removed two exact normalized train/test query overlaps before training.
+
+Next: repeat across seeds, expand query/language coverage, and compare training losses and
+candidate depths using held-out validation. Pin model
 revision and configuration, keep test labels out of selection, and report negative outcomes.
 Add API compatibility fixtures, user feedback, and documented release notes.
 
@@ -50,4 +55,7 @@ reviewed limitations and packaging metadata. PyPI publication is not automatic.
 
 ## Task selection
 
-Finish the earliest incomplete milestone before adding a dashboard, LLM judge, vector database, or training framework. Those are not requirements for this library.
+Prioritize reusable retrieval/model functions and measured experiments. Keep research/model
+training optional and separate from the runtime core. Expand candidate generation, training
+objectives and multilingual evaluation through evidence-backed iterations; avoid unrelated
+infrastructure that does not improve these workflows.

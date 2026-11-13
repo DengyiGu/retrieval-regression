@@ -44,7 +44,9 @@ def main() -> None:
             "import importlib.util; import retrieval_regression as rr; "
             "assert importlib.util.find_spec('pytest') is None; "
             "assert 'site-packages' in rr.__file__; "
-            "assert rr.evaluate({'q':{'d':1}}, {'q':{'d':1}}, k=[1]).summary['recall@1']==1"
+            "assert rr.evaluate({'q':{'d':1}}, {'q':{'d':1}}, k=[1]).summary['recall@1']==1; "
+            "assert rr.rerank({'q':'question'}, {'d':'document'}, {'q':{'d':1}}, "
+            "lambda pairs: [2.0]) == {'q':{'d':2.0}}"
         )
         run([str(python), "-I", "-c", code], directory, "core API without pytest")
         run(

@@ -12,6 +12,7 @@ Python mappings / strict JSON / BEIR TSV / TREC files
 ## Modules
 
 - `validation.py`: identifiers, finite real numbers, qrels/run contracts and diagnostics.
+- `reranking.py`: candidate selection and batched caller-supplied scoring; no model dependency.
 - `evaluation.py`: deterministic ranking and binary/linear-gain metrics; no I/O.
 - `comparison.py`: paired deltas, category summaries, thresholds, optional bootstrap intervals.
 - `models.py`: typed public dataclasses and JSON serialization boundary.
@@ -56,3 +57,9 @@ The text parsers read rows incrementally but retain complete result dictionaries
 validation temporarily retains per-query rank/score/line information and sorts rank labels;
 this is not a streaming evaluation API. Manifest mode makes two extra passes over input files
 and hashes canonical output, keeping the default CLI path free of fingerprint overhead.
+
+
+Optional neural training and inference live in `experiments/reranking/`, outside the runtime
+package. The experiment loads pinned local model resources and supplies `ModelScorer` to the
+core `rerank` function. Raw corpora, checkpoints, training pairs and detailed results stay in
+ignored directories. Separate environments keep torch/Transformers out of minimal installs.

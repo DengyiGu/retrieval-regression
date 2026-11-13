@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 — Unreleased alpha
+
+- Model-independent batched reranking with candidate-score separation and returned Run mappings.
+- Optional local MiniLM neural reranking, controlled random/hard-negative fine-tuning and
+  validation-only model selection, evaluated on SciFact and NFCorpus held-out queries.
+- Normalized query-group splitting and removal of two exact train/test text overlaps.
+- Local neural search example using pretrained or validation-selected adapted checkpoints.
+- Measured model results, actual GPU training/inference and independent metric verification.
+
 ## 0.2.0 — Unreleased alpha
 
 - Explicit BEIR TSV and TREC qrels/run loaders with physical-line diagnostics.

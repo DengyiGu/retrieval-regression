@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "model_id": "cross-encoder/ms-marco-MiniLM-L6-v2",
+  "revision": "233902d25c440f23af6f7d6e94d2946bac0bee0a",
+  "model_files": [
+    {
+      "rfilename": "config.json",
+      "blobId": "88bc4f74b33a2073abc9a66cb532b889448ac3ed",
+      "size": 794
+    },
+    {
+      "rfilename": "model.safetensors",
+      "blobId": "c9aad2ad6c9139e6be3593d5b5a1495732d03154",
+      "size": 90870598,
+      "lfs": {
+        "sha256": "821d1aa69520101d6e0737f78a042ae25b19e5cb9160701909d10434f4aeb0ae",
+        "size": 90870598,
+        "pointerSize": 133
+      }
+    },
+    {
+      "rfilename": "special_tokens_map.json",
+      "blobId": "7520992f25914d962f0e2fd0e0566fc33d19ec59",
+      "size": 132
+    },
+    {
+      "rfilename": "tokenizer.json",
+      "blobId": "688882a79f44442ddc1f60d70334a7ff5df0fb47",
+      "size": 711396
+    },
+    {
+      "rfilename": "tokenizer_config.json",
+      "blobId": "a2435fedfac32b9ad70f052d4f84007730cd3109",
+      "size": 1330
+    },
+    {
+      "rfilename": "vocab.txt",
+      "blobId": "fb140275c155a9c7c5a3b3e0e77a9e839594a938",
+      "size": 231508
+    }
+  ],
+  "seed": 42,
+  "candidates": 50,
+  "max_length": 256,
+  "inference_batch_size": 32,
+  "train_batch_size": 16,
+  "epochs": 1,
+  "learning_rate": 2e-05,
+  "weight_decay": 0.01,
+  "negatives_per_positive": 3,
+  "validation_fraction": 0.1,
+  "variants": [
+    "pretrained",
+    "random_negative",
+    "hard_negative"
+  ],
+  "selection_metric": "ndcg@10",
+  "max_drop": 0.02,
+  "bootstrap_samples": 1000,
+  "datasets": {
+    "scifact": {
+      "md5": "5f7d1de60b170fc8027bb7898e2efca1"
+    },
+    "nfcorpus": {
+      "md5": "a89dba18a62ef92f7d323ec890a0d38d"
+    }
+  }
+}

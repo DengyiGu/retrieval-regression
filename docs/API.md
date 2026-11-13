@@ -164,3 +164,31 @@ A content mismatch aborts with exit 2. These before/after checks detect changing
 workflows; they do not provide an atomic snapshot against adversarial concurrent writers.
 Manifest destinations participate in the same input/output alias protection as JSON and HTML.
 The extra file passes occur only when a manifest is requested.
+
+
+## Batched neural or custom reranking
+
+```python
+from retrieval_regression import rerank
+
+new_run = rerank(queries, corpus, baseline_run, scorer, top_k=50, batch_size=32)
+```
+
+`queries` and `corpus` map string IDs to text. `scorer` receives a sequence of `(query_text,
+document_text)` pairs and returns an iterable with exactly one finite real score per pair.
+External model loading, device choice and truncation belong to the scorer. Generators and
+NumPy score arrays are accepted; tensor-returning scorers should convert outputs to numbers.
+
+The top `top_k` candidates per query are chosen using original scores and the documented ID
+tie break. Scoring batches can span queries. The returned `Run` contains only these candidates
+with new scores; it is a mapping, not a sorted list. Query omissions and empty rankings retain
+their meaning, and the original inputs are not mutated. Reranking cannot retrieve relevant
+documents absent from its candidate pool. Keep the same qrels universe during evaluation.
+
+Selected text is checked before model calls; short/nonfinite scorer output raises a clear error,
+while exceptions raised inside the external scorer propagate. `top_k` and `batch_size` must be
+positive integers. The core imports no torch, Transformers, or hosted-model SDK.
+
+The source checkout includes optional `experiments.reranking` training/inference and
+`examples.neural_search` modules. Their models and datasets are opt-in local resources; they
+are research examples, not provider integrations installed with the runtime wheel.
