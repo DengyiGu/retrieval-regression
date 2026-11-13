@@ -12,7 +12,7 @@ import time
 import tracemalloc
 from pathlib import Path
 
-from retrieval_regression import evaluate
+from retrieval_regression import __version__, evaluate
 
 
 def main() -> None:
@@ -46,6 +46,19 @@ def main() -> None:
     tracemalloc.stop()
     record = {
         "kind": "synthetic_evaluator_benchmark",
+        "evaluator_version": __version__,
+        "missing_queries": len(qrels) - len(run),
+        "measurement_scope": "evaluate only; excludes inputs, warmup, hashing and traced pass",
+        "source_sha256": {
+            str(path.relative_to(Path(__file__).resolve().parents[1])).replace(
+                "\\", "/"
+            ): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in [
+                Path(__file__).resolve(),
+                Path(__file__).resolve().parents[1] / "src/retrieval_regression/evaluation.py",
+                Path(__file__).resolve().parents[1] / "src/retrieval_regression/validation.py",
+            ]
+        },
         "queries": args.queries,
         "documents_per_run_query": args.documents,
         "seed": args.seed,

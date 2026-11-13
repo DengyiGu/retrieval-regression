@@ -3,7 +3,7 @@
 ## Data flow
 
 ```text
-Python mappings / strict JSON
+Python mappings / strict JSON / BEIR TSV / TREC files
         -> validation -> evaluate every judged query -> aggregate metrics
         -> paired comparison -> category summaries -> explicit quality gates
         -> versioned JSON / standalone HTML / CLI exit code / pytest failure
@@ -15,7 +15,9 @@ Python mappings / strict JSON
 - `evaluation.py`: deterministic ranking and binary/linear-gain metrics; no I/O.
 - `comparison.py`: paired deltas, category summaries, thresholds, optional bootstrap intervals.
 - `models.py`: typed public dataclasses and JSON serialization boundary.
-- `io.py`: strict JSON parser and narrowly validated threshold configuration.
+- `io.py`: explicit-format input dispatch, strict JSON and threshold configuration.
+- `adapters.py`: line-oriented BEIR/TREC parsing, duplicate/rank/tag validation and location errors.
+- `provenance.py`: optional input fingerprints, before/after checks and portable result manifests.
 - `reporting.py`: local reports with escaped user text; no external resources.
 - `cli.py`: argument parsing, file orchestration, exit-code contract.
 - `pytest_plugin.py`: optional adapter; the core never imports pytest.
@@ -46,6 +48,11 @@ rows. Confidence intervals are currently overall only, not category-specific.
 
 ## Extensibility
 
-Add BEIR/TREC adapters as isolated parsers; preserve duplicate detection and identifier types.
+BEIR/TREC parsers are isolated from scoring and preserve duplicate detection and identifier types.
 A future streaming API needs a separate result/report contract rather than silently dropping
 per-query evidence. Schema changes need migration notes and backwards-compatibility tests.
+
+The text parsers read rows incrementally but retain complete result dictionaries. TREC rank
+validation temporarily retains per-query rank/score/line information and sorts rank labels;
+this is not a streaming evaluation API. Manifest mode makes two extra passes over input files
+and hashes canonical output, keeping the default CLI path free of fingerprint overhead.

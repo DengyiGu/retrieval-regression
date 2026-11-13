@@ -5,9 +5,11 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
-from .models import Threshold
+from .adapters import read_beir_qrels, read_trec_qrels, read_trec_run
+from .models import Qrels, Run, Threshold
+from .validation import validate_qrels, validate_run_structure
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -63,3 +65,23 @@ def load_thresholds(path: str | Path) -> tuple[Threshold, ...]:
             raise ValueError("threshold group must be a string or null")
         result.append(Threshold(**entry))
     return tuple(result)
+
+
+def load_qrels(path: str | Path, *, format: Literal["json", "beir", "trec"] = "json") -> Qrels:
+    """Load validated judgments using an explicit format; never guess by extension."""
+    if format == "json":
+        return validate_qrels(load_json(path))
+    if format == "beir":
+        return read_beir_qrels(path)
+    if format == "trec":
+        return read_trec_qrels(path)
+    raise ValueError(f"unknown qrels format {format!r}")
+
+
+def load_run(path: str | Path, *, format: Literal["json", "trec"] = "json") -> Run:
+    """Load a structurally valid run; query-universe checks occur during evaluation."""
+    if format == "json":
+        return validate_run_structure(load_json(path))
+    if format == "trec":
+        return read_trec_run(path)
+    raise ValueError(f"unknown run format {format!r}")

@@ -36,3 +36,45 @@ def test_metrics_match_ir_measures_on_seeded_rankings():
         )
         for name, measure in pairs:
             assert result.summary[f"{name}@{cutoff}"] == pytest.approx(oracle[measure], abs=1e-12)
+
+
+@pytest.mark.reference
+def test_standard_file_adapters_match_independent_file_readers(tmp_path):
+    from retrieval_regression import load_qrels, load_run
+
+    rng = random.Random(90421)
+    qrels_lines, run_lines = [], []
+    for qi in range(25):
+        qid = f"{qi:04}"
+        grades = [2] + [rng.randrange(3) for _ in range(11)]
+        scores = rng.sample(range(1000), 12)
+        order = sorted(range(12), key=lambda i: -scores[i])
+        qrels_lines.extend(f"{qid} 0 d{di} {grade}\n" for di, grade in enumerate(grades))
+        run_lines.extend(
+            f"{qid} Q0 d{di} {rank} {scores[di]} test\n" for rank, di in enumerate(order, 1)
+        )
+    qrels_path, run_path = tmp_path / "qrels.txt", tmp_path / "run.txt"
+    qrels_path.write_text("".join(qrels_lines), encoding="utf-8")
+    run_path.write_text("".join(run_lines), encoding="utf-8")
+    actual = evaluate(
+        load_qrels(qrels_path, format="trec"), load_run(run_path, format="trec"), k=[1, 5, 10]
+    )
+    for k in actual.k:
+        measures = {
+            f"recall@{k}": ir.R @ k,
+            f"precision@{k}": ir.P @ k,
+            f"mrr@{k}": ir.RR @ k,
+            f"ndcg@{k}": ir.nDCG @ k,
+        }
+        oracle = list(
+            ir.iter_calc(
+                list(measures.values()),
+                ir.read_trec_qrels(str(qrels_path)),
+                ir.read_trec_run(str(run_path)),
+            )
+        )
+        names = {measure: name for name, measure in measures.items()}
+        for score in oracle:
+            assert actual.per_query[score.query_id][names[score.measure]] == pytest.approx(
+                score.value, abs=1e-12
+            )

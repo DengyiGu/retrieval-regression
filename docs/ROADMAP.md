@@ -17,18 +17,22 @@ Final verification evidence lives in `docs/reports/2026-11-12-validation.md`, no
 Acceptance: another person can rerun one documented command, recover matching metric values,
 and distinguish natural retriever differences from deliberately injected failures.
 
-## M2 — Interoperable input adapters
+## M2 — Interoperable input adapters — delivered in 0.2.0
 
-Implement BEIR qrels TSV and TREC run parsing as separate adapters. Validate duplicate
-query/document pairs, malformed headers/rows, ranks and finite scores; retain string IDs.
-Add format-specific tests and CLI selection. Do not make silent format guesses.
+Implemented: strict BEIR TSV and TREC qrels/run loaders, public Python dispatch, per-input
+CLI format selection, file/line errors, duplicate judgments/documents/ranks, tag and score/rank
+validation. Optional manifests retain input/result fingerprints without machine-specific paths.
 
-Acceptance: public run files can be compared without custom conversion code, preserving the
-same query-universe and metric policies. Keep raw-data licenses separate from project code.
+Evidence: original SciFact BEIR bytes and 60,000 TREC run rows produce exactly matching JSON,
+API and CLI results. Independent reference checks and corruption/missing-query injection pass.
+See docs/reports/2026-11-12-formats.md for conventions, commands and limitations.
 
 ## M3 — Usability and scalability
 
-Profile 100/1,000/10,000-query synthetic evaluations before optimizing. Record time and peak
+Completed: synthetic evaluation at 100/1,000/10,000 queries and 100 documents per present query.
+Recorded time and traced allocations; no evaluator optimization is claimed.
+
+Remaining: profile deeper runs and inspect result/report overhead before optimizing. Record time and peak
 memory, including per-query result overhead. Investigate top-K selection, result/report size,
 report pagination, and eventual streaming only when measurements justify them.
 Add multi-label categories or uncertainty within categories only with explicit semantics.

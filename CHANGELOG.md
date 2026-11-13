@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0 — Unreleased alpha
+
+- Explicit BEIR TSV and TREC qrels/run loaders with physical-line diagnostics.
+- Duplicate-row/rank, consistent-tag and score/rank validation with documented strict profiles.
+- Independent input format selection for CLI comparisons and backward-compatible JSON defaults.
+- Optional portable manifests fingerprint inputs, configuration and results; changing input
+  content aborts before outputs are written.
+- Real SciFact format-conversion audit, independent file-reader parity tests and synthetic
+  measurements through 10,000 queries. No neural model improvement or throughput speedup is claimed.
+
 ## 0.1.0 — Unreleased alpha
 
 - Local, dependency-free retrieval metrics with an explicit query universe.

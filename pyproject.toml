@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "retrieval-regression"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local regression testing for search and RAG retrieval pipelines"
 readme = "README.md"
 requires-python = ">=3.10"

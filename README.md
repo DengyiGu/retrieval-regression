@@ -6,7 +6,7 @@ A local-first Python library for comparing search results, finding query-level r
 and enforcing quality thresholds in automated tests. No paid APIs, LLM judges, GPU, or runtime
 dependencies are required for the core library.
 
-**Status:** working alpha (`0.1.0`). Install from this repository; no PyPI release is claimed.
+**Status:** working alpha (`0.2.0`). Install from this repository; no PyPI release is claimed.
 
 ## The problem
 
@@ -107,6 +107,36 @@ and prints JSON to stdout. Replace `candidate.json` with `regressed.json` to dem
 failed gate. Exit codes: **0** success, **1** failed quality gate, **2** invalid input/configuration.
 No configured thresholds means comparison only, not quality enforcement.
 
+## Standard retrieval files and reproducible runs
+
+Load an existing BEIR test split and TREC exports directly:
+
+```python
+from retrieval_regression import load_qrels, load_run, compare
+
+qrels = load_qrels("examples/formats/qrels.tsv", format="beir")
+baseline = load_run("examples/formats/baseline.run", format="trec")
+candidate = load_run("examples/formats/candidate.run", format="trec")
+result = compare(qrels, baseline, candidate, k=[1, 3])
+```
+
+The CLI accepts separate formats for each input, so migration can mix JSON and TREC runs:
+
+```console
+python -m retrieval_regression compare --qrels examples/formats/qrels.tsv --qrels-format beir --baseline examples/formats/baseline.run --baseline-format trec --candidate examples/formats/candidate.run --candidate-format trec --config examples/toy/gates.json --groups examples/toy/groups.json --k 1 3 --json reports/comparison.json --html reports/comparison.html --manifest reports/manifest.json
+```
+
+Parsers reject duplicate judgments/documents/ranks, mixed run tags, invalid headers and
+non-finite scores with file/line diagnostics. Ranks are checked against scores; scoring still
+uses descending scores and ascending document IDs for ties. The adapters intentionally support
+[a documented strict profile](docs/API.md#file-format-profiles), rather than every historical
+TREC variant. Missing queries remain in the evaluation denominator.
+
+An optional manifest records SHA-256/size/format for every input (including gates and groups),
+evaluator/Python versions, parameters and a canonical result fingerprint. It contains base
+filenames rather than machine-specific absolute paths. Input contents are rechecked before
+reports are written. Keep the original input files with the manifest to reproduce a run.
+
 ## pytest integration
 
 The optional plugin registers the `retrieval_check` fixture:
@@ -132,7 +162,9 @@ Try `python -m pytest examples/test_retrieval_quality.py -q`.
 
 - Recall@K, Precision@K, MRR@K, and graded NDCG@K.
 - Fixed-query macro averaging, including missing and empty rankings as zero.
-- Strict JSON loading: duplicate keys and non-finite numbers are rejected.
+- Strict JSON, original BEIR qrels TSV, TREC qrels and TREC run loading.
+- File/line errors for duplicate rows, invalid ranks, mixed tags and score/rank conflicts.
+- Optional input/result fingerprints for portable, auditable evaluation records.
 - Deterministic tie handling and diagnostics for unjudged retrieved documents.
 - Overall and user-defined category comparisons, with absolute quality-drop budgets.
 - Optional seeded paired-bootstrap intervals for overall metric deltas.
@@ -173,7 +205,11 @@ A public SciFact experiment is included in `benchmarks/scifact.py`; install `.[b
 and run `python benchmarks/scifact.py --download` once, then rerun offline without that flag.
 See [the validation report](docs/reports/2026-11-12-validation.md) for measured outcomes and
 [the follow-up review](docs/reports/2026-11-12-review.md) for audit fixes and remaining limits.
-Ranking-file adapters and large-run scalability work remain on the roadmap. See [research protocol](docs/RESEARCH.md).
+The [format audit](docs/reports/2026-11-12-formats.md) checks original BEIR judgments and
+60,000 exported TREC rows against JSON results and an independent evaluator. It also records
+synthetic measurements up to 10,000 queries. Parsers retain full mappings in memory;
+large-run streaming, additional domains and neural retrieval validation remain on the roadmap.
+See [research protocol](docs/RESEARCH.md).
 
 ## Maintainer
 

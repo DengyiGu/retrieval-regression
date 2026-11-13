@@ -19,6 +19,8 @@ resources, API keys, model calls, or runtime dependencies.
 | F7 | CLI integration | Exit 0/1/2 for success/regression/invalid inputs |
 | F8 | Reports | JSON schema version and standalone escaped HTML |
 | F9 | pytest plugin | Fixture requires thresholds and exposes understandable failures |
+| F11 | Retrieval-file interoperability | BEIR/TREC profiles, line errors, duplicate/rank checks, independent parity |
+| F12 | Evaluation traceability | Portable input/result fingerprints and changed-input abort before output |
 | F10 | Optional uncertainty | Seeded paired bootstrap on common query set; assumptions documented |
 
 ## Non-functional requirements
@@ -34,7 +36,7 @@ resources, API keys, model calls, or runtime dependencies.
 
 ## Initial boundaries
 
-Input is nested JSON/Python mappings with document IDs and scores, not raw documents.
+Input is nested JSON/Python mappings or explicit BEIR/TREC judgment/ranking files with document IDs and scores, not raw documents.
 The library does not run a vector database, train models, judge generated answers, infer
 root causes, or detect every kind of dataset leakage. It reports measured differences;
 users determine why a pipeline changed.

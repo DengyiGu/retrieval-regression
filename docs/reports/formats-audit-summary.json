@@ -1,0 +1,143 @@
+{
+  "experiment": "beir-trec-adapter-audit",
+  "version": "0.2.0",
+  "executed_at_utc": "2026-11-13T06:34:39.601346+00:00",
+  "git_head": "54e2a2288856ff10b3a0e5b5b89c28eba5158322",
+  "git_dirty": true,
+  "source_sha256": {
+    "src/retrieval_regression/__init__.py": "b76b0b9ecc2a276fa87762956bfbdd2dff1370358dd768a6fff8b7388c2f1e18",
+    "src/retrieval_regression/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "src/retrieval_regression/adapters.py": "ada1c28dd607c2f019ad2411270f0eb0bfb942829bd0d20663c3844360e1080d",
+    "src/retrieval_regression/cli.py": "a946732c7d191d6b6e83af1ae6015718282ccfab4f9e7ed4aa735369e9bdc006",
+    "src/retrieval_regression/comparison.py": "053b9866b3b86546cdd6068d3a692d0f93d0fcf6529378529e58dafc03073544",
+    "src/retrieval_regression/evaluation.py": "2c6754d48c1a213d68868adbf666a6432fc62e08462c93fdd01bf42bf91d7c24",
+    "src/retrieval_regression/io.py": "43cf31c300fb0acf933504edde91d2c47af93f7e15e3bbabee82b29f825382aa",
+    "src/retrieval_regression/models.py": "2e90b4658149be5228a3b391bd7f3921d1e6bc14663c4b644bba2f3ca647d602",
+    "src/retrieval_regression/provenance.py": "5a08c4a87832a85c4e8b4fd8dff4d16ed090176896af38ac35c6f12b7cb0f1cc",
+    "src/retrieval_regression/pytest_plugin.py": "569285123949c3950fa9174a2051a9153c2611af7a8a7bfd680d685a31c3cfc8",
+    "src/retrieval_regression/reporting.py": "8098b262fd62525348a0c90d24fc234b209e61624bab77c25463254893168f7e",
+    "src/retrieval_regression/validation.py": "134ecfd31ffb759db2fd1939aa65cba6d885a65c3fef78966db887745cd4157c",
+    "benchmarks/audit_formats.py": "2010dcae055d40cbf9559fbb77224ab4616265a3717b1edbd6c19705ca179334"
+  },
+  "dataset": {
+    "name": "BEIR SciFact",
+    "split": "test",
+    "queries": 300,
+    "judgments": 339,
+    "archive_sha256": "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165"
+  },
+  "run_rows": {
+    "bm25": 30000,
+    "tfidf": 30000
+  },
+  "formats": [
+    "original BEIR TSV",
+    "TREC qrels",
+    "TREC run",
+    "JSON"
+  ],
+  "json_api_and_trec_api_and_cli_identical": true,
+  "ndcg10": {
+    "baseline": 0.669692703005812,
+    "candidate": 0.6279652522956557
+  },
+  "gate_passed": false,
+  "independent_reference_max_error": {
+    "bm25": 6.661338147750939e-16,
+    "tfidf": 6.661338147750939e-16
+  },
+  "corruptions_rejected": [
+    {
+      "case": "duplicate_document",
+      "line": 30001,
+      "reason": "duplicate run document for '1'/'40212412'"
+    },
+    {
+      "case": "mixed_run_tag",
+      "line": 30001,
+      "reason": "mixed run tags: expected 'bm25', got 'another-experiment'"
+    },
+    {
+      "case": "score_rank_conflict",
+      "line": 2,
+      "reason": "scores increase with rank for query '1'"
+    },
+    {
+      "case": "nonfinite_score",
+      "line": 1,
+      "reason": "score must be a finite number"
+    }
+  ],
+  "omitted_query_fault": {
+    "omitted": 30,
+    "denominator": 300,
+    "gate_detected": true
+  },
+  "manifest": {
+    "schema_version": "1.0",
+    "kind": "evaluation_manifest",
+    "software": {
+      "retrieval_regression": "0.2.0",
+      "python": "3.11.3"
+    },
+    "inputs": [
+      {
+        "role": "qrels",
+        "name": "qrels.tsv",
+        "format": "beir",
+        "sha256": "0864bb985e0ca2367ba217977e72004d549054b2b06666ed9d4825ac7c21284c",
+        "size_bytes": 5389
+      },
+      {
+        "role": "baseline",
+        "name": "bm25.run",
+        "format": "trec",
+        "sha256": "068e54b85d667fafbd700953130646c281846291452ec755a1deda302a227403",
+        "size_bytes": 1257907
+      },
+      {
+        "role": "candidate",
+        "name": "tfidf.run",
+        "format": "trec",
+        "sha256": "0e1f8078c852880dce2eec10fb827c07b383ca0da1ae0f4407dd16ef0d7cd05e",
+        "size_bytes": 1339830
+      },
+      {
+        "role": "groups",
+        "name": "groups.json",
+        "format": "json",
+        "sha256": "bb6796ccd97f1c2d3a102837148e6a9655a2381920c8467dea70afdb328f45f8",
+        "size_bytes": 7525
+      },
+      {
+        "role": "config",
+        "name": "gates.json",
+        "format": "json",
+        "sha256": "ede8d52beefa8288ecc574f494f2a182b6e61d42e1b6255a0064994873c0144f",
+        "size_bytes": 53
+      }
+    ],
+    "parameters": {
+      "command": "compare",
+      "k": [
+        1,
+        5,
+        10
+      ],
+      "bootstrap_samples": 1000,
+      "confidence": 0.95,
+      "seed": 42
+    },
+    "result_sha256": "9dc14944a6b7a7d4aded27b620402186a1793ff28ef11ddec46e8563123b9d51",
+    "result_hash_encoding": "UTF-8 JSON; sorted keys; ASCII escapes; compact separators",
+    "query_count": 300,
+    "quality_gated": true
+  },
+  "python": "3.11.3",
+  "limitations": [
+    "One scientific domain and two lexical runs.",
+    "TREC runs are exported from saved JSON; raw qrels use original BEIR bytes.",
+    "Strict subset: positive unique ranks, one run tag and integer judgment grades.",
+    "Parsers retain full mappings in memory; not a streaming evaluator."
+  ]
+}

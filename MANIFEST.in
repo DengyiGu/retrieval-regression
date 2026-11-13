@@ -4,7 +4,7 @@ include LICENSE README.md CONTRIBUTING.md CHANGELOG.md
 include docs/API.md docs/ARCHITECTURE.md docs/DEVELOPMENT.md docs/EVALUATION.md
 include docs/REQUIREMENTS.md docs/RESEARCH.md docs/ROADMAP.md
 recursive-include docs/reports *.md *.json
-recursive-include examples *.py *.json
+recursive-include examples *.py *.json *.tsv *.trec *.run
 recursive-include benchmarks *.py
 recursive-include scripts *.py
 recursive-include tests *.py

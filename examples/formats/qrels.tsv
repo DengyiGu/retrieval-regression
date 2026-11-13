@@ -1,0 +1,7 @@
+query-id	corpus-id	score
+q-install	install	2
+q-install	setup	1
+q-install	other	0
+q-api	api	2
+q-version	version	2
+q-empty	troubleshooting	1

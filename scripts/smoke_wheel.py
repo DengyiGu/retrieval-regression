@@ -65,6 +65,37 @@ def main() -> None:
             directory,
             "installed CLI entry point",
         )
+        run(
+            [
+                str(cli),
+                "compare",
+                "--qrels",
+                str(ROOT / "examples/formats/qrels.tsv"),
+                "--qrels-format",
+                "beir",
+                "--baseline",
+                str(ROOT / "examples/formats/baseline.run"),
+                "--baseline-format",
+                "trec",
+                "--candidate",
+                str(ROOT / "examples/formats/candidate.run"),
+                "--candidate-format",
+                "trec",
+                "--config",
+                str(ROOT / "examples/toy/gates.json"),
+                "--groups",
+                str(ROOT / "examples/toy/groups.json"),
+                "--k",
+                "1",
+                "3",
+                "--manifest",
+                str(directory / "manifest.json"),
+            ],
+            directory,
+            "installed BEIR/TREC comparison and manifest",
+        )
+        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+        assert manifest["quality_gated"] and manifest["inputs"][0]["format"] == "beir"
         if args.with_pytest:
             run(
                 [str(python), "-m", "pip", "install", str(wheel) + "[pytest]"],
@@ -91,6 +122,7 @@ def main() -> None:
         "module_entry_point": True,
         "cli_entry_point": True,
         "pytest_plugin": args.with_pytest,
+        "file_adapters_and_manifest": True,
     }
     output = work / "validation" / "wheel-smoke.json"
     output.parent.mkdir(parents=True, exist_ok=True)

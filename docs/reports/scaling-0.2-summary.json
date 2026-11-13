@@ -1,0 +1,98 @@
+{
+  "kind": "synthetic_scale_profile",
+  "measurements": [
+    {
+      "kind": "synthetic_evaluator_benchmark",
+      "evaluator_version": "0.2.0",
+      "missing_queries": 10,
+      "measurement_scope": "evaluate only; excludes inputs, warmup, hashing and traced pass",
+      "source_sha256": {
+        "benchmarks/benchmark_evaluator.py": "622be6c5fca0d1c519d201c8c83dd7db3e4b754956c79d6b8fc75f2d32ef8e46",
+        "src/retrieval_regression/evaluation.py": "2c6754d48c1a213d68868adbf666a6432fc62e08462c93fdd01bf42bf91d7c24",
+        "src/retrieval_regression/validation.py": "134ecfd31ffb759db2fd1939aa65cba6d885a65c3fef78966db887745cd4157c"
+      },
+      "queries": 100,
+      "documents_per_run_query": 100,
+      "seed": 42,
+      "repeats": 3,
+      "seconds": [
+        0.007124399999156594,
+        0.007196799997473136,
+        0.007414499996230006
+      ],
+      "median_seconds": 0.007196799997473136,
+      "separate_tracemalloc_peak_bytes": 431722,
+      "python": "3.11.3",
+      "platform": "Windows-10-10.0.26300-SP0",
+      "k": [
+        5,
+        10
+      ],
+      "input_sha256": "5b13b0f5817223619710286dac03727f34e450faa360c6a7c3eaff94d8499c05"
+    },
+    {
+      "kind": "synthetic_evaluator_benchmark",
+      "evaluator_version": "0.2.0",
+      "missing_queries": 100,
+      "measurement_scope": "evaluate only; excludes inputs, warmup, hashing and traced pass",
+      "source_sha256": {
+        "benchmarks/benchmark_evaluator.py": "622be6c5fca0d1c519d201c8c83dd7db3e4b754956c79d6b8fc75f2d32ef8e46",
+        "src/retrieval_regression/evaluation.py": "2c6754d48c1a213d68868adbf666a6432fc62e08462c93fdd01bf42bf91d7c24",
+        "src/retrieval_regression/validation.py": "134ecfd31ffb759db2fd1939aa65cba6d885a65c3fef78966db887745cd4157c"
+      },
+      "queries": 1000,
+      "documents_per_run_query": 100,
+      "seed": 42,
+      "repeats": 3,
+      "seconds": [
+        0.07492889999412,
+        0.07186920000822283,
+        0.07758199999807402
+      ],
+      "median_seconds": 0.07492889999412,
+      "separate_tracemalloc_peak_bytes": 4411204,
+      "python": "3.11.3",
+      "platform": "Windows-10-10.0.26300-SP0",
+      "k": [
+        5,
+        10
+      ],
+      "input_sha256": "477336b3743a4de860438be3f2e9960d51568f9fddc5a8b91d21017a1e0dff09"
+    },
+    {
+      "kind": "synthetic_evaluator_benchmark",
+      "evaluator_version": "0.2.0",
+      "missing_queries": 1000,
+      "measurement_scope": "evaluate only; excludes inputs, warmup, hashing and traced pass",
+      "source_sha256": {
+        "benchmarks/benchmark_evaluator.py": "622be6c5fca0d1c519d201c8c83dd7db3e4b754956c79d6b8fc75f2d32ef8e46",
+        "src/retrieval_regression/evaluation.py": "2c6754d48c1a213d68868adbf666a6432fc62e08462c93fdd01bf42bf91d7c24",
+        "src/retrieval_regression/validation.py": "134ecfd31ffb759db2fd1939aa65cba6d885a65c3fef78966db887745cd4157c"
+      },
+      "queries": 10000,
+      "documents_per_run_query": 100,
+      "seed": 42,
+      "repeats": 3,
+      "seconds": [
+        0.787840100005269,
+        0.7808849999855738,
+        1.1370583999960218
+      ],
+      "median_seconds": 0.787840100005269,
+      "separate_tracemalloc_peak_bytes": 44067640,
+      "python": "3.11.3",
+      "platform": "Windows-10-10.0.26300-SP0",
+      "k": [
+        5,
+        10
+      ],
+      "input_sha256": "1726548922b1f37bb3ee796723ad6effc8a38962f5fa532fb1ed2543c5c1f27b"
+    }
+  ],
+  "limitations": [
+    "One local Windows/Python environment, three timed repetitions per size.",
+    "100 retrieved documents per present query; 10% of queries deliberately missing.",
+    "Traced allocations exclude input construction and do not represent total process memory.",
+    "No optimization or cross-hardware performance comparison."
+  ]
+}

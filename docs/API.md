@@ -99,3 +99,68 @@ The HTML gate status is `NOT CONFIGURED` when no thresholds were supplied. The e
 quality verdict. CLI stdout uses ASCII JSON escapes so Unicode IDs survive legacy terminal
 encodings; report files retain UTF-8 text. CLI output paths must differ from input files and
 from each other, including symbolic-link and hard-link aliases present at validation time.
+
+
+## File-format profiles
+
+`load_qrels(path, *, format="json")` and `load_run(path, *, format="json")` return validated
+nested mappings and are exported at package level. They do not guess from a filename extension.
+JSON retains its existing fractional-grade support. `load_run` checks structure; unknown query
+IDs are rejected later by `evaluate`/`compare` against the selected qrels universe.
+
+| Input | Format name | Accepted rows |
+| --- | --- | --- |
+| JSON qrels/run | `json` (default) | Existing nested mapping contract |
+| BEIR qrels | `beir` | Exact header `query-id<TAB>corpus-id<TAB>score`, then three tab-separated fields |
+| TREC qrels | `trec` | Four whitespace-separated fields: `qid 0 docid grade` |
+| TREC run | `trec` | Six whitespace-separated fields: `qid Q0 docid rank score tag` |
+
+Text formats accept UTF-8 with optional BOM, LF/CRLF, blank lines, interleaved queries and
+out-of-order rows. IDs are preserved as strings and must be whitespace-free tokens. Comments,
+quoted/multiline fields and format guessing are not supported. BEIR/TREC judgment grades must
+be non-negative decimal integers; negative unjudged markers such as `-1` are rejected rather
+than silently relabeled. Every judged query still requires a positive grade.
+
+Run scores may be finite negative or exponential-notation numbers. Rank labels must be positive
+1-based decimal integers and unique within a query. Gaps are allowed, for example a filtered
+export retaining ranks 2 and 8. Scores must be non-increasing when sorted by declared rank.
+The whole file must use one tag. Repeated query/document pairs are always errors, even when
+values agree. Empty run files are valid and score all judged queries as missing.
+
+Ranks are validation metadata. The evaluator always orders by score descending, then document
+ID ascending; declared ranks do not override a tied score. This strict profile rejects certain
+historical TREC files accepted by permissive tools (zero-based/repeated ranks, mixed tags,
+nonzero qrels iteration, or score/rank contradictions). Convert those files explicitly under a
+known policy rather than expecting silent repairs.
+
+`InputFormatError` is a public `ValueError` subclass with `path`, `line_number` and `message`.
+Row failures include physical file/line coordinates; whole-file failures may have no line.
+Low-level parser functions are also available in `retrieval_regression.adapters`:
+`read_beir_qrels`, `read_trec_qrels`, `read_trec_run`.
+
+CLI flags: `--qrels-format {json,beir,trec}` on both commands; `--run-format {json,trec}` on
+`evaluate`; independent `--baseline-format` and `--candidate-format` on `compare`. Defaults
+remain JSON. Groups and threshold configuration remain JSON.
+
+Sources: [BEIR loader](https://github.com/beir-cellar/beir/blob/main/beir/datasets/data_loader.py),
+[NIST TREC run guidelines](https://ir.nist.gov/trec-covid/round5.html). This library's strict
+validation policy is documented above; NIST evaluation itself sorts by scores and ignores ranks.
+
+## Evaluation manifests
+
+Both CLI commands accept `--manifest PATH`. This is a separate JSON artifact with schema 1.0,
+kind `evaluation_manifest`; existing result schema 1.0 is unchanged. It records input roles,
+base filenames, formats, byte lengths and SHA-256 hashes, package/Python versions, effective
+cutoffs, bootstrap configuration when applicable, query count and whether gates were configured.
+Config and group files are fingerprinted too. The `result_sha256` hashes the result serialized
+as UTF-8 JSON with sorted keys, ASCII escapes and compact `,`/`:` separators.
+
+Absolute input paths are excluded. A manifest is evidence about supplied files and evaluator
+settings; it does not embed those files or automatically capture the external retriever/model
+configuration. Retain source inputs and model configuration separately.
+
+Inputs are hashed before parsing and rehashed after evaluation, before any report is written.
+A content mismatch aborts with exit 2. These before/after checks detect changing inputs in normal
+workflows; they do not provide an atomic snapshot against adversarial concurrent writers.
+Manifest destinations participate in the same input/output alias protection as JSON and HTML.
+The extra file passes occur only when a manifest is requested.

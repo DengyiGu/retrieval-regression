@@ -1,0 +1,6 @@
+q-install 0 install 2
+q-install 0 setup 1
+q-install 0 other 0
+q-api 0 api 2
+q-version 0 version 2
+q-empty 0 troubleshooting 1

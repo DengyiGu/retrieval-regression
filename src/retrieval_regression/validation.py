@@ -50,21 +50,27 @@ def validate_qrels(value: Any) -> Qrels:
     return result
 
 
-def validate_run(value: Any, qrels: Qrels) -> tuple[Run, tuple[Diagnostic, ...]]:
+def validate_run_structure(value: Any) -> Run:
     if not isinstance(value, Mapping):
         raise ValueError("run must be a mapping of query IDs to document scores")
     result: Run = {}
-    diagnostics: list[Diagnostic] = []
     for qid, scores in value.items():
         _identifier(qid, "run query")
-        if qid not in qrels:
-            raise ValueError(f"run contains unknown query ID {qid!r}")
         if not isinstance(scores, Mapping):
             raise ValueError(f"run[{qid!r}] must be a mapping")
         result[qid] = {
             _identifier(doc, f"run[{qid!r}] document"): _number(score, f"run[{qid!r}][{doc!r}]")
             for doc, score in scores.items()
         }
+    return result
+
+
+def validate_run(value: Any, qrels: Qrels) -> tuple[Run, tuple[Diagnostic, ...]]:
+    result = validate_run_structure(value)
+    for qid in result:
+        if qid not in qrels:
+            raise ValueError(f"run contains unknown query ID {qid!r}")
+    diagnostics: list[Diagnostic] = []
     for qid in sorted(qrels):
         if qid not in result:
             diagnostics.append(Diagnostic("missing_query", qid, "Missing query scored as zero"))
