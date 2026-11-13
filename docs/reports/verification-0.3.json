@@ -42,6 +42,47 @@
     }
   },
   "remote_ci": {
-    "status": "pending publication"
+    "status": "passed",
+    "source_commit": "b9ea617476a213d3a0916c4bfd0fa35357419fc5",
+    "run_url": "https://github.com/DengyiGu/retrieval-regression/actions/runs/43386371333",
+    "jobs_passed": 9,
+    "jobs": [
+      {
+        "name": "reference-and-package",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.12)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.12)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.10)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.11)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.13)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.10)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (ubuntu-latest, 3.13)",
+        "conclusion": "success"
+      },
+      {
+        "name": "test (windows-latest, 3.11)",
+        "conclusion": "success"
+      }
+    ]
   }
 }
