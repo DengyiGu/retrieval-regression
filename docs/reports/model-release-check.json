@@ -1,0 +1,125 @@
+{
+  "experiment": "one-additional-seed-release-check",
+  "seeds": {
+    "42": {
+      "validation": {
+        "recall@1": 0.55625,
+        "precision@1": 0.5625,
+        "mrr@1": 0.5625,
+        "ndcg@1": 0.5625,
+        "recall@5": 0.75,
+        "precision@5": 0.155,
+        "mrr@5": 0.6331249999999999,
+        "ndcg@5": 0.6632575301615817,
+        "recall@10": 0.79375,
+        "precision@10": 0.0825,
+        "mrr@10": 0.6398214285714285,
+        "ndcg@10": 0.6779520044999525
+      },
+      "tests": {
+        "scifact": {
+          "recall@1": 0.5598333333333333,
+          "precision@1": 0.5866666666666667,
+          "mrr@1": 0.5866666666666667,
+          "ndcg@1": 0.5866666666666667,
+          "recall@5": 0.7606111111111111,
+          "precision@5": 0.168,
+          "mrr@5": 0.666611111111111,
+          "ndcg@5": 0.6825577197728294,
+          "recall@10": 0.8067777777777778,
+          "precision@10": 0.09066666666666667,
+          "mrr@10": 0.6720304232804233,
+          "ndcg@10": 0.6989730949141514
+        },
+        "nfcorpus": {
+          "recall@1": 0.058442312951881216,
+          "precision@1": 0.47368421052631576,
+          "mrr@1": 0.47368421052631576,
+          "ndcg@1": 0.45975232198142413,
+          "recall@5": 0.1283255333923323,
+          "precision@5": 0.31826625386996904,
+          "mrr@5": 0.5535087719298245,
+          "ndcg@5": 0.3761040491038575,
+          "recall@10": 0.15466180022086817,
+          "precision@10": 0.23777089783281732,
+          "mrr@10": 0.5575495110324832,
+          "ndcg@10": 0.3343499209304065
+        }
+      }
+    },
+    "13": {
+      "validation": {
+        "recall@1": 0.56875,
+        "precision@1": 0.575,
+        "mrr@1": 0.575,
+        "ndcg@1": 0.575,
+        "recall@5": 0.75,
+        "precision@5": 0.155,
+        "mrr@5": 0.6435416666666667,
+        "ndcg@5": 0.6705110202972294,
+        "recall@10": 0.7875,
+        "precision@10": 0.08125,
+        "mrr@10": 0.6491964285714286,
+        "ndcg@10": 0.683296943469413
+      },
+      "tests": {
+        "scifact": {
+          "recall@1": 0.5665,
+          "precision@1": 0.5933333333333334,
+          "mrr@1": 0.5933333333333334,
+          "ndcg@1": 0.5933333333333334,
+          "recall@5": 0.752,
+          "precision@5": 0.16666666666666666,
+          "mrr@5": 0.6665,
+          "ndcg@5": 0.6803620159514937,
+          "recall@10": 0.8051111111111111,
+          "precision@10": 0.09066666666666667,
+          "mrr@10": 0.6731732804232804,
+          "ndcg@10": 0.699262702313638
+        },
+        "nfcorpus": {
+          "recall@1": 0.05821368325157909,
+          "precision@1": 0.48297213622291024,
+          "mrr@1": 0.48297213622291024,
+          "ndcg@1": 0.46904024767801855,
+          "recall@5": 0.1263613330575322,
+          "precision@5": 0.3188854489164087,
+          "mrr@5": 0.5560371517027863,
+          "ndcg@5": 0.37675740326208507,
+          "recall@10": 0.15335042929694284,
+          "precision@10": 0.23529411764705882,
+          "mrr@10": 0.5598628925254312,
+          "ndcg@10": 0.3333188515726199
+        }
+      }
+    }
+  },
+  "fixed_split": {
+    "seed": 42,
+    "split_sha256": "0d3cafffd44dff01cf09cbfbe1da1e6275e1163cf8c436c4d2a82f1d15c13d84"
+  },
+  "selected_seed": 13,
+  "selected_checkpoint_name": "random-negative-seed-13",
+  "selected_model_sha256": "8b7e0995f5373a7243026b79667e2960ee7de53deb0afd0baa479b5a94cc0d20",
+  "training": {
+    "steps": 209,
+    "examples_seen": 3336,
+    "first_step_loss": 0.5478739738464355,
+    "last_step_loss": 0.0014243951300159097,
+    "mean_step_loss": 0.11493372020860866,
+    "wall_seconds": 10.276339199976064,
+    "peak_allocated_bytes": 1703660544
+  },
+  "checks": {
+    "scifact_both_seeds_improve_over_pretrained": true,
+    "nfcorpus_no_ndcg10_drop_exceeding_002": true
+  },
+  "passed": true,
+  "sampling_strategy": "random_negative; selected in the original validation experiment",
+  "limitations": [
+    "Two seeds only, not a comprehensive stability study.",
+    "Previously observed test sets are reused; no fresh unseen test is claimed.",
+    "The two seeds share a fixed split but differ in sampling, shuffle and dropout.",
+    "NFCorpus top-rank tradeoffs remain documented in the original report."
+  ]
+}

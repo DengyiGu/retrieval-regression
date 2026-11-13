@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--query", required=True)
+    parser.add_argument("--checkpoint", type=Path, help="Load a downloaded local model directory")
     parser.add_argument("--dataset", choices=["scifact", "nfcorpus"], default="scifact")
     parser.add_argument(
         "--model",
@@ -32,17 +33,23 @@ def main():
     parser.add_argument("--device", choices=["cuda", "cpu"], default="cuda")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    config = load_json(args.experiment / "config.json")
-    variant = (
-        load_json(args.experiment / "selection.json")["selected"]
-        if args.model == "selected"
-        else args.model
+    config_path = args.experiment / "config.json"
+    config = load_json(
+        config_path if config_path.exists() else ROOT / "experiments/reranking/config.json"
     )
-    checkpoint = (
-        ROOT / "data/models" / config["revision"]
-        if variant == "pretrained"
-        else args.experiment / variant
-    )
+    if args.checkpoint:
+        variant, checkpoint = "local_checkpoint", args.checkpoint
+    else:
+        variant = (
+            load_json(args.experiment / "selection.json")["selected"]
+            if args.model == "selected"
+            else args.model
+        )
+        checkpoint = (
+            ROOT / "data/models" / config["revision"]
+            if variant == "pretrained"
+            else args.experiment / variant
+        )
     with zipfile.ZipFile(ROOT / "data" / f"{args.dataset}.zip") as archive:
         rows = [
             json.loads(line)

@@ -160,6 +160,22 @@ model-quality and GPU-memory results. Small single-seed experiments support loca
 they do not establish universal gains. Dataset and pretrained-weight terms remain separate
 from the code license; weights and raw texts are not redistributed.
 
+## Download the adapted model
+
+The [v0.3.0 model release](https://github.com/DengyiGu/retrieval-regression/releases/tag/v0.3.0)
+provides `scifact-minilm-reranker-v0.3.0.zip` and `SHA256SUMS`. Extract the archive to obtain
+`scifact-minilm-reranker/`; weights and tokenizer are complete, so retraining is optional.
+See the [model card](experiments/reranking/MODEL_CARD.md) for loading, attribution and limitations.
+With the corpus cached, search using the downloaded checkpoint:
+
+```console
+python -m examples.neural_search --checkpoint scifact-minilm-reranker --query "your English query"
+```
+
+Code and experiments stay in this repository; model binaries are Release assets rather than
+Git history. The released seed-13 checkpoint was selected on validation after one additional
+seed check. Both checked runs improved SciFact NDCG@10; broader improvements are not established.
+
 ## pytest integration
 
 The optional plugin registers the `retrieval_check` fixture:

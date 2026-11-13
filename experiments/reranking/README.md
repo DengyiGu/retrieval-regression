@@ -68,3 +68,20 @@ are English; multilingual behavior is not established.
 
 Review original component terms for your intended use; the repository's MIT code license does
 not relicense external data or pretrained weights.
+
+
+## Released checkpoint and a short seed check
+
+The [model card](MODEL_CARD.md) links a ready-to-load checkpoint in the existing repository's
+[v0.3.0 release](https://github.com/DengyiGu/retrieval-regression/releases/tag/v0.3.0). A separate
+model or code repository is not needed for this checkpoint. Release assets keep cloning small.
+
+To reproduce the one-additional-seed check after the original experiment:
+
+```console
+python -m scripts.check_model_release --seed 13
+```
+
+It reuses the original fixed split, trains only the validation-selected random-negative
+condition and reports that checkpoint on the two existing test sets. It selects between seeds
+42 and 13 using validation only. This is a short confirmation, not a comprehensive seed sweep.
