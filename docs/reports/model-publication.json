@@ -1,0 +1,19 @@
+{
+  "release_url": "https://github.com/DengyiGu/retrieval-regression/releases/tag/v0.3.0",
+  "download_url": "https://github.com/DengyiGu/retrieval-regression/releases/download/v0.3.0/scifact-minilm-reranker-v0.3.0.zip",
+  "download_size": 83464572,
+  "sha256": "ea76dd9f142bf352b122d18491ff39b5748211fc4418fe926e9fd7c656865e32",
+  "download_verified": true,
+  "selected_seed": 13,
+  "model_sha256": "8b7e0995f5373a7243026b79667e2960ee7de53deb0afd0baa479b5a94cc0d20",
+  "fresh_download_load": "passed",
+  "scores": [
+    9.520100593566895,
+    -7.680115222930908
+  ],
+  "code_ci": {
+    "url": "https://github.com/DengyiGu/retrieval-regression/actions/runs/43403645544",
+    "source_commit": "474aca1a12dfd564a704487134a0f31e06f8a66a",
+    "jobs_passed": 9
+  }
+}

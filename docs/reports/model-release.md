@@ -25,3 +25,13 @@ contains weights, tokenizer, model card, Apache-2.0 license, attribution notice 
 inside one zip; `SHA256SUMS` is a separate asset. The [model card](../../experiments/reranking/MODEL_CARD.md)
 shows loading without training. Code remains MIT; upstream model/tokenizer terms are retained.
 Raw datasets, training pairs, local instructions and credentials are not distributed.
+
+
+## Publication verification
+
+The release is public and contains the 83,464,572-byte model archive and a separate checksum
+file. The public archive was downloaded without authentication, its SHA-256 verified, and the
+extracted model/tokenizer successfully loaded for two short inference examples. Exact artifact
+hashes and the passing nine-job code CI result are in [the publication record](model-publication.json).
+The model is labeled a research preview; no separate repository or Git-history weight blobs
+were introduced.
