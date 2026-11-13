@@ -40,6 +40,19 @@ statistics or speed. [ir-measures](https://ir-measur.es/en/latest/) covers many 
 Changing chunk boundaries or document IDs requires corresponding judgment mapping; this library
 does not create that mapping. It also needs external judgments and cannot assess generated answers.
 
+## Companion project: JudgeGate
+
+[JudgeGate](https://github.com/DengyiGu/judgegate) investigates how to decide a retrieval
+regression with fewer human relevance labels. It uses a local LLM judge as a predictor,
+corrects predictions with sampled human labels, and stops with a sequential pass/fail test.
+Retrieval Regression supplies the full-qrels evaluation and reporting workflow; the
+projects remain independently installable with no new core dependencies.
+
+The [joint example and measured replay](https://github.com/DengyiGu/judgegate/blob/main/docs/INTEGRATION.md)
+align both tools on Precision@K, using the same queries, rankings and relevance convention.
+JudgeGate's label-sampling uncertainty on fixed queries differs from this library's
+query-bootstrap uncertainty. Its scaled DCG is not this library's NDCG.
+
 ## Install from source
 
 Python 3.10+ is required. These commands work in Windows PowerShell and POSIX shells:
